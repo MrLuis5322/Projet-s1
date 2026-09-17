@@ -17,10 +17,3 @@ int myFunction(int x, int y) {
   return x + y;
 }
 
-//testtt
-
-//ttsiofherofmfmd
-// blblblblabalbalba
-//test 3
-
-//test 4
