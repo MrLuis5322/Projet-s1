@@ -2,3 +2,7 @@
 .DStore
 .vscode/c_cpp_properties.json
 .vscode/c_cpp_properties.json
+.pio/build/megaatmega2560/idedata.json
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.pio/build/project.checksum
