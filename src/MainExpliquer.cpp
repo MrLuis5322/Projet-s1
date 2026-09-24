@@ -1,15 +1,16 @@
 /*
 Projet: Le nom du script
-Equipe: Votre numero d'equipe
+Equipe: 13
 Auteurs: Les membres auteurs du script
 Description: Breve description du script
-Date: Derniere date de modification
+Date: 24/09/2026
 */
 
 /*
 Inclure les librairies de functions que vous voulez utiliser
 */
 #include <LibRobus.h>
+#include <Arduino.h>
 
 /*
 Variables globales et defines

@@ -5,6 +5,7 @@
             "includePath": [
                 "C:/Users/lolui/Desktop/Programation/Robus/include",
                 "C:/Users/lolui/Desktop/Programation/Robus/src",
+                "C:/Users/lolui/Desktop/Programation/Robus/lib",
                 "C:/Users/lolui/.platformio/packages/framework-arduino-avr/cores/arduino",
                 "C:/Users/lolui/.platformio/packages/framework-arduino-avr/variants/mega",
                 "C:/Users/lolui/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
@@ -20,6 +21,7 @@
                 "path": [
                     "C:/Users/lolui/Desktop/Programation/Robus/include",
                     "C:/Users/lolui/Desktop/Programation/Robus/src",
+                    "C:/Users/lolui/Desktop/Programation/Robus/lib",
                     "C:/Users/lolui/.platformio/packages/framework-arduino-avr/cores/arduino",
                     "C:/Users/lolui/.platformio/packages/framework-arduino-avr/variants/mega",
                     "C:/Users/lolui/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
