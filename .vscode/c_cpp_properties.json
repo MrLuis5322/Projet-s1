@@ -1,14 +1,9 @@
-//
-// !!! WARNING !!! AUTO-GENERATED FILE!
-// PLEASE DO NOT MODIFY IT AND USE "platformio.ini":
-// https://docs.platformio.org/page/projectconf/section_env_build.html#build-flags
-//
 {
     "configurations": [
         {
             "name": "PlatformIO",
             "includePath": [
-                "C:/Users/lolui/Desktop/Programation/Robus/include",
+                "C:\\Users\\kaysh\\OneDrive - USherbrooke\\genie robotique S1\\Projet\\Projet-s1/include",
                 "C:/Users/lolui/Desktop/Programation/Robus/src",
                 "C:/Users/lolui/Desktop/Programation/Robus/lib/VexQuadEncoder",
                 "C:/Users/lolui/Desktop/Programation/Robus/lib/SoftTimer",
@@ -32,8 +27,7 @@
                 "C:/Users/lolui/.platformio/packages/framework-arduino-avr/variants/mega",
                 "C:/Users/lolui/Desktop/Programation/Robus/lib/LibRobus",
                 "C:/Users/lolui/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
-                "C:/Users/lolui/.platformio/packages/framework-arduino-avr/libraries/HID/src",
-                ""
+                "C:/Users/lolui/.platformio/packages/framework-arduino-avr/libraries/HID/src"
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
