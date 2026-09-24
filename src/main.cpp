@@ -6,6 +6,13 @@ Description: Breve description du script
 Date: 24/09/2026
 */
 
+
+/*
+Get-Location
+Test-Path .\platformio.ini
+Test-Path .\lib\Robus\Robus.h
+*/
+
 /*
 Inclure les librairies de functions que vous voulez utiliser
 */
