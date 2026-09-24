@@ -1,6 +1,6 @@
 /*
 Projet: Le nom du script
-Equipe: 13
+Equipe: 13-A
 Auteurs: Les membres auteurs du script
 Description: Breve description du script
 Date: 24/09/2026
