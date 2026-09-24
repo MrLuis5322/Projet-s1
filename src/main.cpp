@@ -25,6 +25,7 @@ Inclure les librairies de functions que vous voulez utiliser
 Variables globales et defines
  -> defines...
  -> L'ensemble des fonctions y ont acces
+ 
 */
 
 bool bumperArr; //variable vrai ou faux
