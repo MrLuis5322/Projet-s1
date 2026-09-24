@@ -1,41 +1,31 @@
 /*
 Projet: Le nom du script
-Equipe: 13
+Equipe: Votre numero d'equipe
 Auteurs: Les membres auteurs du script
 Description: Breve description du script
-Date: 24/09/2026
-*/
-
-
-/*
-Get-Location
-Test-Path .\platformio.ini
-Test-Path .\lib\Robus\Robus.h
-
+Date: Derniere date de modification
 */
 
 /*
 Inclure les librairies de functions que vous voulez utiliser
 */
 #include <LibRobus.h>
-// a essayer #include <Robus/Robus.h>
-#include <Arduino.h>
 
 /*
 Variables globales et defines
  -> defines...
  -> L'ensemble des fonctions y ont acces
- 
 */
 
-bool bumperArr; //variable vrai ou faux
-int vertpin = 48; //nombre entier
-int rougepin = 49;
+bool bumperArr;
+int vertpin = 48;
+int rougepin = 49; 
 bool vert = false;
 bool rouge = false;
 int etat = 0; // = 0 arrêt 1 = avance 2 = recule 3 = TourneDroit 4 = TourneGauche
 int etatPast = 0;
-float vitesse = 0.40; //nombre avec des decimales
+float vitesse_Gauche = 0.40;
+float vitesse_Droite = 0.427;
 
 /*
 Vos propres fonctions sont creees ici
@@ -57,23 +47,23 @@ void arret(){
 };
 
 void avance(){
-  MOTOR_SetSpeed(RIGHT,vitesse);
-  MOTOR_SetSpeed(LEFT, vitesse);
+  MOTOR_SetSpeed(RIGHT,vitesse_Droite);
+  MOTOR_SetSpeed(LEFT, vitesse_Gauche);
 };
 
 void recule(){
-  MOTOR_SetSpeed(RIGHT, -0.5*vitesse);
-  MOTOR_SetSpeed(LEFT, -vitesse);
+  MOTOR_SetSpeed(RIGHT, -vitesse_Droite);
+  MOTOR_SetSpeed(LEFT, -0.52*vitesse_Gauche);
 };
 
 void tourneDroit(){
-  MOTOR_SetSpeed(RIGHT, 0.5*vitesse);
-  MOTOR_SetSpeed(LEFT, -0.5*vitesse);
+  MOTOR_SetSpeed(RIGHT, 0.5*vitesse_Droite);
+  MOTOR_SetSpeed(LEFT, -0.5*vitesse_Gauche);
 };
 
 void tourneGauche(){
-  MOTOR_SetSpeed(RIGHT, -0.5*vitesse);
-  MOTOR_SetSpeed(LEFT, 0.5*vitesse);
+  MOTOR_SetSpeed(RIGHT, -0.5*vitesse_Droite);
+  MOTOR_SetSpeed(LEFT, 0.5*vitesse_Gauche);
 };
 
 /*
