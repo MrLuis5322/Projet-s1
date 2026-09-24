@@ -9,6 +9,7 @@ Date: Derniere date de modification
 /*
 Inclure les librairies de functions que vous voulez utiliser
 */
+#include <Arduino.h>
 #include <LibRobus.h>
 #include <DetercteurProximite.h>
 #include <Mouvement.h>
