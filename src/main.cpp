@@ -10,6 +10,9 @@ Date: Derniere date de modification
 Inclure les librairies de functions que vous voulez utiliser
 */
 #include <LibRobus.h>
+#include <DetercteurProximite.h>
+#include <Mouvement.h>
+#include <Son.h>
 
 /*
 Variables globales et defines
@@ -18,53 +21,7 @@ Variables globales et defines
 */
 
 bool bumperArr;
-int vertpin = 48;
-int rougepin = 49; 
-bool vert = false;
-bool rouge = false;
-int etat = 0; // = 0 arrêt 1 = avance 2 = recule 3 = TourneDroit 4 = TourneGauche
-int etatPast = 0;
-float vitesse_Gauche = 0.40;
-float vitesse_Droite = 0.427;
 
-/*
-Vos propres fonctions sont creees ici
-*/
-
-void beep(int count){
-  for(int i=0;i<count;i++){
-    AX_BuzzerON();
-    delay(100);
-    AX_BuzzerOFF();
-    delay(100);  
-  }
-  delay(400);
-}
-
-void arret(){
-  MOTOR_SetSpeed(RIGHT, 0);
-  MOTOR_SetSpeed(LEFT, 0);
-};
-
-void avance(){
-  MOTOR_SetSpeed(RIGHT,vitesse_Droite);
-  MOTOR_SetSpeed(LEFT, vitesse_Gauche);
-};
-
-void recule(){
-  MOTOR_SetSpeed(RIGHT, -vitesse_Droite);
-  MOTOR_SetSpeed(LEFT, -0.52*vitesse_Gauche);
-};
-
-void tourneDroit(){
-  MOTOR_SetSpeed(RIGHT, 0.5*vitesse_Droite);
-  MOTOR_SetSpeed(LEFT, -0.5*vitesse_Gauche);
-};
-
-void tourneGauche(){
-  MOTOR_SetSpeed(RIGHT, -0.5*vitesse_Droite);
-  MOTOR_SetSpeed(LEFT, 0.5*vitesse_Gauche);
-};
 
 /*
 Fonctions d'initialisation (setup)
@@ -75,9 +32,7 @@ Fonctions d'initialisation (setup)
 void setup(){
   BoardInit();
   
-  //initialisation
-  pinMode(vertpin, INPUT);
-  pinMode(rougepin, INPUT);
+  initialiserDetecteurProximite();
   delay(100);
   beep(3);
 }
@@ -100,22 +55,7 @@ void loop() {
     }
   }
   
-  vert = digitalRead(vertpin);
-  rouge = digitalRead(rougepin);
-  if (etat > 0){
-    if (vert && rouge){ // aucun obstacle => avance
-      etat = 1;
-    }
-    if (!vert && !rouge){  // obstacle devant => recule
-      etat = 2;
-    }
-    if (!vert && rouge){ // obstacle à gauche => tourne droit
-        etat = 3;
-      }
-    if (vert && !rouge){ // obstacle à droite => tourne gauche
-        etat = 4;
-    }
-  }
+  mettreAJourEtatAvecDetecteurs();
 
   if (etatPast != etat){
     arret();
@@ -124,19 +64,19 @@ void loop() {
   else{
     switch (etat)
     {
-    case 0:
+    case ETAT_ARRET:
       arret();
       break;
-    case 1:
+    case ETAT_AVANCE:
       avance();
       break;
-    case 2:
+    case ETAT_RECULE:
       recule();
       break;
-    case 3:
+    case ETAT_TOURNE_DROIT:
       tourneDroit();
       break;
-    case 4:
+    case ETAT_TOURNE_GAUCHE:
       tourneGauche();
       break;            
     default:
