@@ -10,6 +10,7 @@ Date: 24/09/2026
 Inclure les librairies de functions que vous voulez utiliser
 */
 #include <LibRobus.h>
+// a essayer #include <Robus/Robus.h>
 #include <Arduino.h>
 
 /*
