@@ -3,7 +3,7 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "C:\\Users\\kaysh\\OneDrive - USherbrooke\\genie robotique S1\\Projet\\Projet-s1/include",
+                "C:/Users/lolui/Desktop/Programation/Robus/include",
                 "C:/Users/lolui/Desktop/Programation/Robus/src",
                 "C:/Users/lolui/Desktop/Programation/Robus/lib/VexQuadEncoder",
                 "C:/Users/lolui/Desktop/Programation/Robus/lib/SoftTimer",
@@ -27,7 +27,8 @@
                 "C:/Users/lolui/.platformio/packages/framework-arduino-avr/variants/mega",
                 "C:/Users/lolui/Desktop/Programation/Robus/lib/LibRobus",
                 "C:/Users/lolui/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
-                "C:/Users/lolui/.platformio/packages/framework-arduino-avr/libraries/HID/src"
+                "C:/Users/lolui/.platformio/packages/framework-arduino-avr/libraries/HID/src",
+                "${workspaceFolder}/include"
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
