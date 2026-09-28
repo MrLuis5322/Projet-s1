@@ -11,9 +11,9 @@ Inclure les librairies de functions que vous voulez utiliser
 */
 #include <Arduino.h>
 #include <LibRobus.h>
-#include <DetercteurProximite.h>
-#include <Mouvement.h>
-#include <Son.h>
+#include "DetecteurProximite.h"
+#include "Mouvement.h"
+#include "Son.h"
 
 /*
 Variables globales et defines
@@ -32,10 +32,14 @@ Fonctions d'initialisation (setup)
 */
 void setup(){
   BoardInit();
-  
+  initialiserSon();
   initialiserDetecteurProximite();
   delay(100);
   beep(3);
+
+//test
+  Serial.begin(9600);
+
 }
 
 /*
@@ -87,4 +91,19 @@ void loop() {
     }
   }
   delay(200);
+
+  Serial.print("Valeur lue: ");
+  Serial.println((analogRead(PIN_SON)));
 }
+
+
+
+
+
+/*
+Au calme (sans son 5 kHz) : notez la valeur moyenne (ex: 50 ou 100).
+Avec le son 5 kHz allumé à distance réelle : notez la valeur (ex: 750).
+Choisir un soeuil a michemin
+
+
+*/
