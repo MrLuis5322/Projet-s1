@@ -1,17 +1,16 @@
 /*
-Projet: Le nom du script
-Equipe: Votre numero d'equipe
-Auteurs: Les membres auteurs du script
+Main - P13
+Auteurs: Alexandre H., Luis 
 Description: Breve description du script
-Date: Derniere date de modification
+Date: 29/09/2026
 */
 
 /*
-Inclure les librairies de functions que vous voulez utiliser
+librairies de functions a utiliser
 */
 #include <Arduino.h>
 #include <LibRobus.h>
-#include <DetercteurProximite.h>
+#include <DetecteurProximite.h>
 #include <Mouvement.h>
 #include <Son.h>
 
@@ -21,15 +20,22 @@ Variables globales et defines
  -> L'ensemble des fonctions y ont acces
 */
 
-bool bumperArr;
+bool bumperGa; //0
+bool bumperDr; //1
+bool bumperAv; //2
+bool bumperArr; //3
 
-
+// Etat et reglages partages avec main.cpp et DetercteurProximite.cpp.
+// Le header les declare avec extern; ces lignes en sont les definitions uniques.
+int etat = 0; // = 0 arrêt 1 = avance 2 = recule 3 = TourneDroit 4 = TourneGauche
+int etatPast = 0;
 /*
 Fonctions d'initialisation (setup)
  -> Se fait appeler au debut du programme
  -> Se fait appeler seulement un fois
  -> Generalement on y initilise les varibbles globales
 */
+
 void setup(){
   BoardInit();
   
@@ -55,7 +61,22 @@ void loop() {
       etat = 0;
     }
   }
-  
+// Tourner a gauche
+   bumperGa = ROBUS_IsBumper(0);
+  if (bumperGa){
+      tourneGauche90();
+  }
+// Tourner a droite
+  bumperDr = ROBUS_IsBumper(1);
+  if (bumperDr){
+      tourneDroite90();
+  }
+  // Test avancer pour determiner la vitesse
+  bumperAv = ROBUS_IsBumper(2);
+  if (bumperAv){
+      mouvementAvant(1000);
+  }
+
   mettreAJourEtatAvecDetecteurs();
 
   if (etatPast != etat){
@@ -65,23 +86,23 @@ void loop() {
   else{
     switch (etat)
     {
-    case ETAT_ARRET:
+    case 0:
       arret();
       break;
-    case ETAT_AVANCE:
-      avance();
+    case 1:
+      mouvementAvant(1000);
       break;
-    case ETAT_RECULE:
-      recule();
+    case 2:
+      mouvementArriere(1000);
       break;
-    case ETAT_TOURNE_DROIT:
-      tourneDroit();
+    case 3:
+      tourneDroite90();
       break;
-    case ETAT_TOURNE_GAUCHE:
-      tourneGauche();
+    case 4:
+      tourneGauche90();
       break;            
     default:
-      avance();
+      mouvementAvant(1000);
       etat = 1;
     break;
     }

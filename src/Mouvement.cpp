@@ -1,29 +1,27 @@
 /*
-Projet: Mouvement
-Equipe: Votre numero d'equipe
-Auteurs: Les membres auteurs du script
-Description: Code pour faire bouger et tourner le robot
-Date: 24/09/2026
+Mouvement - P13
+Alexandre H.
+Code pour faire bouger et tourner le robot
+24/09/2026
 */
 
 #include <LibRobus.h>
 #include <Mouvement.h>
 
 
-// Etat et reglages partages avec main.cpp et DetercteurProximite.cpp.
-// Le header les declare avec extern; ces lignes en sont les definitions uniques.
-int etat = 0; // = 0 arrêt 1 = avance 2 = recule 3 = TourneDroit 4 = TourneGauche
-int etatPast = 0;
-float vitesse_Gauche = 0.40;
-float vitesse_Droite = 0.427;
+float SpeedMult = 1.5;
+float vitesse_Gauche = 0.40*SpeedMult;
+float vitesse_Droite = 0.426*SpeedMult;
+
+int temps = 1000; // temps de déplacement en ms
 
 
 // Arrete les deux moteurs en envoyant une vitesse nulle.
 void arret(){
   MOTOR_SetSpeed(RIGHT, 0);
   MOTOR_SetSpeed(LEFT, 0);
-};
-
+}
+/* Ancien avant arriere 
 // Une vitesse positive fait avancer chaque moteur.
 void avance(){
   MOTOR_SetSpeed(RIGHT,vitesse_Droite);
@@ -36,15 +34,30 @@ void recule(){
   MOTOR_SetSpeed(RIGHT, -vitesse_Droite);
   MOTOR_SetSpeed(LEFT, -0.52*vitesse_Gauche);
 };
+*/
 
-// Pour tourner sur place, les moteurs tournent dans des directions opposees.
-void tourneDroit(){
-  MOTOR_SetSpeed(RIGHT, 0.5*vitesse_Droite);
-  MOTOR_SetSpeed(LEFT, -0.5*vitesse_Gauche);
-};
-
-// Meme principe que tourneDroit, avec les directions inversees.
-void tourneGauche(){
+// Pour tourner sur place d'environ 90 degrees a sa droite.
+void tourneDroite90(){
   MOTOR_SetSpeed(RIGHT, -0.5*vitesse_Droite);
   MOTOR_SetSpeed(LEFT, 0.5*vitesse_Gauche);
+  delay(890);
+  arret();
+};
+
+// Pour tourner sur place d'environ 90 degrees a sa gauche.
+void tourneGauche90(){
+  MOTOR_SetSpeed(RIGHT, 0.5*vitesse_Droite);
+  MOTOR_SetSpeed(LEFT, -0.5*vitesse_Gauche);
+  delay(910);
+  arret();
+};
+
+void mouvementAvant(float temps){
+  MOTOR_SetSpeed(RIGHT, vitesse_Droite);
+  MOTOR_SetSpeed(LEFT, vitesse_Gauche);
+  delay(temps); 
+  MOTOR_SetSpeed(RIGHT, 0.5*vitesse_Droite); // slow stop 
+  MOTOR_SetSpeed(LEFT, 0.5*vitesse_Gauche);
+  delay(150);
+  arret();
 };
