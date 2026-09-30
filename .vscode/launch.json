@@ -12,9 +12,21 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug",
+<<<<<<< HEAD
             "executable": "C:/Users/vdesc/OneDrive - USherbrooke/Projet/Projet-s1/.pio/build/megaatmega2560/firmware.elf",
             "projectEnvName": "megaatmega2560",
             "toolchainBinDir": "C:/Users/vdesc/.platformio/packages/toolchain-atmelavr/bin",
+=======
+            "executable": "C:/Users/gelol/OneDrive - USherbrooke/Automne 2026 - S1/Projet/Programmation/Projet-s1/.pio/build/megaatmega2560/firmware.elf",
+            "projectEnvName": "megaatmega2560",
+            "toolchainBinDir": "C:/Users/gelol/.platformio/packages/toolchain-atmelavr/bin",
+
+=======
+            "executable": "C:/Users/rapha/OneDrive - USherbrooke/Documents/1. Session A26/0. Projet/Programme/Projet-s1/.pio/build/megaatmega2560/firmware.elf",
+            "projectEnvName": "megaatmega2560",
+            "toolchainBinDir": "C:/Users/rapha/.platformio/packages/toolchain-atmelavr/bin",
+>>>>>>> 9d04195613f541a214dfc6ccaca15d49c89185c7
+>>>>>>> 6f868ba7a2401995736e512e11bb46188df91e33
             "internalConsoleOptions": "openOnSessionStart",
             "preLaunchTask": {
                 "type": "PlatformIO",
@@ -25,18 +37,42 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
+<<<<<<< HEAD
             "executable": "C:/Users/vdesc/OneDrive - USherbrooke/Projet/Projet-s1/.pio/build/megaatmega2560/firmware.elf",
             "projectEnvName": "megaatmega2560",
             "toolchainBinDir": "C:/Users/vdesc/.platformio/packages/toolchain-atmelavr/bin",
+=======
+            "executable": "C:/Users/gelol/OneDrive - USherbrooke/Automne 2026 - S1/Projet/Programmation/Projet-s1/.pio/build/megaatmega2560/firmware.elf",
+            "projectEnvName": "megaatmega2560",
+            "toolchainBinDir": "C:/Users/gelol/.platformio/packages/toolchain-atmelavr/bin",
+
+=======
+            "executable": "C:/Users/rapha/OneDrive - USherbrooke/Documents/1. Session A26/0. Projet/Programme/Projet-s1/.pio/build/megaatmega2560/firmware.elf",
+            "projectEnvName": "megaatmega2560",
+            "toolchainBinDir": "C:/Users/rapha/.platformio/packages/toolchain-atmelavr/bin",
+>>>>>>> 9d04195613f541a214dfc6ccaca15d49c89185c7
+>>>>>>> 6f868ba7a2401995736e512e11bb46188df91e33
             "internalConsoleOptions": "openOnSessionStart"
         },
         {
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (without uploading)",
+<<<<<<< HEAD
             "executable": "C:/Users/vdesc/OneDrive - USherbrooke/Projet/Projet-s1/.pio/build/megaatmega2560/firmware.elf",
             "projectEnvName": "megaatmega2560",
             "toolchainBinDir": "C:/Users/vdesc/.platformio/packages/toolchain-atmelavr/bin",
+=======
+            "executable": "C:/Users/gelol/OneDrive - USherbrooke/Automne 2026 - S1/Projet/Programmation/Projet-s1/.pio/build/megaatmega2560/firmware.elf",
+            "projectEnvName": "megaatmega2560",
+            "toolchainBinDir": "C:/Users/gelol/.platformio/packages/toolchain-atmelavr/bin",
+
+=======
+            "executable": "C:/Users/rapha/OneDrive - USherbrooke/Documents/1. Session A26/0. Projet/Programme/Projet-s1/.pio/build/megaatmega2560/firmware.elf",
+            "projectEnvName": "megaatmega2560",
+            "toolchainBinDir": "C:/Users/rapha/.platformio/packages/toolchain-atmelavr/bin",
+>>>>>>> 9d04195613f541a214dfc6ccaca15d49c89185c7
+>>>>>>> 6f868ba7a2401995736e512e11bb46188df91e33
             "internalConsoleOptions": "openOnSessionStart",
             "loadMode": "manual"
         }
