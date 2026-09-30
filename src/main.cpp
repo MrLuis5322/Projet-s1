@@ -1,7 +1,7 @@
 /*
-Projet: Le nom du script
+Projet: Labyrinthe-S1
 Equipe: 13-A
-Auteurs: Les membres auteurs du script
+Auteurs: 
 Description: Breve description du script
 Date: 24/09/2026
 */
@@ -18,7 +18,6 @@ Test-Path .\lib\Robus\Robus.h
 Inclure les librairies de functions que vous voulez utiliser
 */
 #include <LibRobus.h>
-// a essayer #include <Robus/Robus.h>
 #include <Arduino.h>
 
 /*
@@ -27,19 +26,34 @@ Variables globales et defines
  -> L'ensemble des fonctions y ont acces
 */
 
+//********CONSTANTES*******//
+#define VERT_PIN 48
+#define ROUGE_PIN 49
+#define KP 1
+#define KI 0.40
+#define KD 0.15
+#define dt 0.01
+
 bool bumperArr; //variable vrai ou faux
-int vertpin = 48; //nombre entier
-int rougepin = 49;
 bool vert = false;
 bool rouge = false;
 int etat = 0; // = 0 arrêt 1 = avance 2 = recule 3 = TourneDroit 4 = TourneGauche
 int etatPast = 0;
-float vitesseM1 = 0.4; //nombre avec des decimales
-float vitesseM2 = 0.4; //nombre avec des decimales
+int count = 0;
+
+float vitesseM1 = 0.0;
+float vitesseM2 = 0.0;
+
+// variables PID
+float pulseCibleM1 = 50.63;
+float pulseCibleM2 = 50;
 float integrale = 0;
-float dt = 0.05;
+float derivee = 0;
+float correction = 0;
 float erreurPrecedenteM1 = 0;
 float erreurPrecedenteM2 = 0;
+int32_t countEnc1 = 0;
+int32_t countEnc2 = 0;
 
 /*
 Vos propres fonctions sont creees ici
@@ -58,46 +72,45 @@ void beep(int count){
 void arret(){
   MOTOR_SetSpeed(RIGHT, 0);
   MOTOR_SetSpeed(LEFT, 0);
-};
+}
 
 void avance(){
-  MOTOR_SetSpeed(LEFT,vitesseM1);
+  MOTOR_SetSpeed(LEFT, vitesseM1);
   MOTOR_SetSpeed(RIGHT, vitesseM2);
-};
+}
 
 void recule(){
   MOTOR_SetSpeed(LEFT, -0.5*vitesseM1);
   MOTOR_SetSpeed(RIGHT, -0.5*vitesseM2);
-};
+}
 
 void tourneDroit(){
   MOTOR_SetSpeed(LEFT, 0.5*vitesseM1);
   MOTOR_SetSpeed(RIGHT, -0.5*vitesseM2);
-};
+}
 
 void tourneGauche(){
   MOTOR_SetSpeed(LEFT, -0.5*vitesseM1);
   MOTOR_SetSpeed(RIGHT, 0.5*vitesseM2);
-};
+}
 
-float calculPid(int pulse, float vitesse, float &erreurPrecedente){
-  float pulseCible = 1000;
+float calculPid(int pulse, float vitesse, float &erreurPrecedente, float pulseCible){
   float erreur = pulseCible - pulse;
-  float Kp = 0.4;
-  float Ki = 0.02;
-  float Kd = 0.005;
-
+  
   integrale += erreur * dt;
-
-  float derivee = (erreur - erreurPrecedente) / dt;
-
-  float correction = Kp * erreur + Ki * integrale + Kd * derivee;
+  derivee = (erreur - erreurPrecedente) / dt;
+  correction = KP * erreur + KI * integrale + KD * derivee;
 
   erreurPrecedente = erreur;
 
   return vitesse + correction*0.0001; 
+}
 
-};
+void avanceDroit(int encodeur1, int encodeur2){
+  avance();
+  vitesseM1 = calculPid(encodeur1, vitesseM1, erreurPrecedenteM1, pulseCibleM1);
+  vitesseM2 = calculPid(encodeur2, vitesseM2, erreurPrecedenteM2, pulseCibleM2);
+}
 
 /*
 Fonctions d'initialisation (setup)
@@ -108,11 +121,9 @@ Fonctions d'initialisation (setup)
 void setup(){
   BoardInit();
   
-  //initialisation
-  pinMode(vertpin, INPUT);
-  pinMode(rougepin, INPUT);
+  pinMode(VERT_PIN, INPUT);
+  pinMode(ROUGE_PIN, INPUT);
   delay(100);
-  beep(3);
   Serial.println("Initialisation complete");
 }
 
@@ -122,20 +133,30 @@ Fonctions de boucle infini
 */
 void loop() {
 
-  //Test encodeurs
-  MOTOR_SetSpeed(LEFT,vitesseM1);
-  MOTOR_SetSpeed(RIGHT,vitesseM2);
+  //Test encodeurs PID
+
+  if(ROBUS_IsBumper(3)){
+    etat = 1;
+  }
+  if(ROBUS_IsBumper(2)){
+    etat = 0;
+    arret();
+  }
+  if(!etat){
+    return;
+  }
+
   int32_t enc1 = ENCODER_Read(0);
   int32_t enc2 = ENCODER_Read(1);
-  Serial.print("Encoder 1: ");
-  Serial.println(enc1);
-  Serial.print("Encoder 2: ");
-  Serial.println(enc2);
-  vitesseM1 = calculPid(enc1, vitesseM1, erreurPrecedenteM1);
-  vitesseM2 = calculPid(enc2, vitesseM2, erreurPrecedenteM2);
+
+  avanceDroit(enc1, enc2);
+  
+  countEnc1 += enc1;
+  countEnc2 += enc2;
+  
   ENCODER_Reset(0);
   ENCODER_Reset(1);
-  delay(100);
+  delay(10);
 
 
   // etatPast = etat;
@@ -151,8 +172,8 @@ void loop() {
   //   }
   // }
   
-  // vert = digitalRead(vertpin);
-  // rouge = digitalRead(rougepin);
+  // vert = digitalRead(VERT_PIN);
+  // rouge = digitalRead(ROUGE_PIN);
   // if (etat > 0){
   //   if (vert && rouge){ // aucun obstacle => avance
   //     etat = 1;
