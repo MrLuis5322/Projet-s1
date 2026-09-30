@@ -8,7 +8,6 @@
         {
             "name": "PlatformIO",
             "includePath": [
-<<<<<<< HEAD
                 "C:/Users/gelol/OneDrive - USherbrooke/Automne 2026 - S1/Projet/Programmation/Projet-s1/include",
                 "C:/Users/gelol/OneDrive - USherbrooke/Automne 2026 - S1/Projet/Programmation/Projet-s1/src",
                 "C:/Users/gelol/OneDrive - USherbrooke/Automne 2026 - S1/Projet/Programmation/Projet-s1/lib/LibRobUS-master/src",
@@ -33,7 +32,7 @@
                 "C:/Users/gelol/OneDrive - USherbrooke/Automne 2026 - S1/Projet/Programmation/Projet-s1/lib/VexQuadEncoder",
                 "C:/Users/gelol/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
                 "C:/Users/gelol/.platformio/packages/framework-arduino-avr/libraries/HID/src",
-=======
+
                 "C:/Users/rapha/OneDrive - USherbrooke/Documents/1. Session A26/0. Projet/Programme/Projet-s1/include",
                 "C:/Users/rapha/OneDrive - USherbrooke/Documents/1. Session A26/0. Projet/Programme/Projet-s1/src",
                 "C:/Users/rapha/OneDrive - USherbrooke/Documents/1. Session A26/0. Projet/Programme/Projet-s1/lib/LibRobUS-master/src",
@@ -44,13 +43,43 @@
                 "C:/Users/rapha/.platformio/packages/framework-arduino-avr/variants/mega",
                 "C:/Users/rapha/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
                 "C:/Users/rapha/.platformio/packages/framework-arduino-avr/libraries/HID/src",
+<<<<<<< HEAD
+>>>>>>> 9d04195613f541a214dfc6ccaca15d49c89185c7
+=======
 >>>>>>> 9d04195613f541a214dfc6ccaca15d49c89185c7
                 ""
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
+                    "C:/Users/rapha/OneDrive - USherbrooke/Documents/1. Session A26/0. Projet/Programme/Projet-s1/include",
+                    "C:/Users/rapha/OneDrive - USherbrooke/Documents/1. Session A26/0. Projet/Programme/Projet-s1/src",
+                    "C:/Users/rapha/OneDrive - USherbrooke/Documents/1. Session A26/0. Projet/Programme/Projet-s1/lib/LibRobUS-master/src",
+                    "C:/Users/rapha/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
+                    "C:/Users/rapha/.platformio/packages/framework-arduino-avr/libraries/SoftwareSerial/src",
+                    "C:/Users/rapha/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
+                    "C:/Users/rapha/.platformio/packages/framework-arduino-avr/cores/arduino",
+                    "C:/Users/rapha/.platformio/packages/framework-arduino-avr/variants/mega",
+                    "C:/Users/rapha/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
+                    "C:/Users/rapha/.platformio/packages/framework-arduino-avr/libraries/HID/src",
 <<<<<<< HEAD
+>>>>>>> 9d04195613f541a214dfc6ccaca15d49c89185c7
+=======
+>>>>>>> 9d04195613f541a214dfc6ccaca15d49c89185c7
+                    ""
+                ]
+            },
+            "defines": [
+                "PLATFORMIO=60200",
+                "ARDUINO_AVR_MEGA2560",
+                "F_CPU=16000000L",
+                "ARDUINO_ARCH_AVR",
+                "ARDUINO=10808",
+                "__AVR_ATmega2560__",
+                ""
+            ],
+            "cStandard": "gnu11",
+            "cppStandard": "gnu++11",
                     "C:/Users/gelol/OneDrive - USherbrooke/Automne 2026 - S1/Projet/Programmation/Projet-s1/include",
                     "C:/Users/gelol/OneDrive - USherbrooke/Automne 2026 - S1/Projet/Programmation/Projet-s1/src",
                     "C:/Users/gelol/OneDrive - USherbrooke/Automne 2026 - S1/Projet/Programmation/Projet-s1/lib/LibRobUS-master/src",
@@ -75,34 +104,7 @@
                     "C:/Users/gelol/OneDrive - USherbrooke/Automne 2026 - S1/Projet/Programmation/Projet-s1/lib/VexQuadEncoder",
                     "C:/Users/gelol/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
                     "C:/Users/gelol/.platformio/packages/framework-arduino-avr/libraries/HID/src",
-=======
-                    "C:/Users/rapha/OneDrive - USherbrooke/Documents/1. Session A26/0. Projet/Programme/Projet-s1/include",
-                    "C:/Users/rapha/OneDrive - USherbrooke/Documents/1. Session A26/0. Projet/Programme/Projet-s1/src",
-                    "C:/Users/rapha/OneDrive - USherbrooke/Documents/1. Session A26/0. Projet/Programme/Projet-s1/lib/LibRobUS-master/src",
-                    "C:/Users/rapha/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
-                    "C:/Users/rapha/.platformio/packages/framework-arduino-avr/libraries/SoftwareSerial/src",
-                    "C:/Users/rapha/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
-                    "C:/Users/rapha/.platformio/packages/framework-arduino-avr/cores/arduino",
-                    "C:/Users/rapha/.platformio/packages/framework-arduino-avr/variants/mega",
-                    "C:/Users/rapha/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
-                    "C:/Users/rapha/.platformio/packages/framework-arduino-avr/libraries/HID/src",
->>>>>>> 9d04195613f541a214dfc6ccaca15d49c89185c7
-                    ""
-                ]
-            },
-            "defines": [
-                "PLATFORMIO=60200",
-                "ARDUINO_AVR_MEGA2560",
-                "F_CPU=16000000L",
-                "ARDUINO_ARCH_AVR",
-                "ARDUINO=10808",
-                "__AVR_ATmega2560__",
-                ""
-            ],
-            "cStandard": "gnu11",
-            "cppStandard": "gnu++11",
-<<<<<<< HEAD
-            "compilerPath": "C:/Users/gelol/.platformio/packages/toolchain-atmelavr/bin/avr-gcc.exe",
+
 =======
             "compilerPath": "C:/Users/rapha/.platformio/packages/toolchain-atmelavr/bin/avr-gcc.exe",
 >>>>>>> 9d04195613f541a214dfc6ccaca15d49c89185c7
