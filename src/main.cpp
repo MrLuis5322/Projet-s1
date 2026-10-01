@@ -1,24 +1,21 @@
 /*
+Main - P13
+Auteurs: Alexandre H., Luis 
 Projet: Labyrinthe-S1
 Equipe: 13-A
 Auteurs: 
 Description: Breve description du script
-Date: 24/09/2026
-*/
-
-
-/*
-Get-Location
-Test-Path .\platformio.ini
-Test-Path .\lib\Robus\Robus.h
-
+Date: 29/09/2026
 */
 
 /*
-Inclure les librairies de functions que vous voulez utiliser
+librairies de functions a utiliser
 */
-#include <LibRobus.h>
 #include <Arduino.h>
+#include <LibRobus.h>
+#include "DetecteurProximite.h"
+#include "Mouvement.h"
+#include "Son.h"
 
 /*
 Variables globales et defines
@@ -121,13 +118,21 @@ Fonctions d'initialisation (setup)
  -> Se fait appeler seulement un fois
  -> Generalement on y initilise les varibbles globales
 */
+
 void setup(){
   BoardInit();
+  initialiserSon();
+  initialiserDetecteurProximite();
   
   pinMode(vertPin, INPUT);
   pinMode(rougePin, INPUT);
   delay(100);
   Serial.println("Initialisation complete");
+  beep(3);
+
+//test
+  Serial.begin(9600);
+
 }
 
 /*
