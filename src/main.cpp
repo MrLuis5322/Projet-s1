@@ -12,6 +12,7 @@ Inclure les librairies de functions que vous voulez utiliser
 #include <LibRobus.h>
 #include <Mouvement.h>
 #include <DetecteurProximite.h>
+#include "Son.h"
 
 /*
 Variables globales et defines
@@ -20,6 +21,7 @@ int posX = 2; // 1,2,3
 int posY = 1; // 1 - 10 (Goal)
 bool goal = false; //
 
+
 bool bumperGa; //0
 bool bumperDr; //1
 bool bumperAv; //2
@@ -27,8 +29,9 @@ bool bumperArr; //3
 
 int etat = 0; // = 0=Arret 1=Avance 2=Droite 3=Gauche 4=Recule 
 int etatPast = 0;
+bool robotDemarre = false; 
 
-
+/*
 void beep(int count){
   for(int i=0;i<count;i++){
     AX_BuzzerON();
@@ -38,6 +41,7 @@ void beep(int count){
   }
   delay(400);
 }
+*/
 
 /*
 Fonctions d'initialisation (setup)
@@ -53,6 +57,7 @@ void setup(){
   pinMode(rougepin, INPUT);
   delay(1000);
   beep(1);
+  initialiserSon();
 }
 
 /*
@@ -61,6 +66,17 @@ Fonctions de boucle infini
 
 
 void loop() {
+
+   // Attente signal 5 kHz
+  if (robotDemarre == false) {
+    arret();
+    if (detecter5kHz()) {
+      robotDemarre = true;
+      beep(2);
+    }
+    return;
+  }
+
 
   while (goal != true) {
     Serial.println("Goal: ");
