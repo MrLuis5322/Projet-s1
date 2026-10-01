@@ -10,15 +10,9 @@ librairies de functions a utiliser
 */
 #include <Arduino.h>
 #include <LibRobus.h>
-<<<<<<< HEAD
 #include "DetecteurProximite.h"
 #include "Mouvement.h"
 #include "Son.h"
-=======
-#include <DetecteurProximite.h>
-#include <Mouvement.h>
-#include <Son.h>
->>>>>>> a5909f77e9992378e785f97819175e2ea3322686
 
 /*
 Variables globales et defines
@@ -126,11 +120,3 @@ void loop() {
 
 
 
-
-/*
-Au calme (sans son 5 kHz) : notez la valeur moyenne (ex: 50 ou 100).
-Avec le son 5 kHz allumé à distance réelle : notez la valeur (ex: 750).
-Choisir un soeuil a michemin
-
-
-*/

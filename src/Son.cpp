@@ -50,3 +50,13 @@ bool detecter5kHz() {
   }
   return false; // Le signal n'a pas été détecté.
 }
+
+
+
+/*
+ (sans son 5 kHz) : notez la valeur moyenne (ex: 50 ou 100).
+Avec le son 5 kHz allumé à distance réelle : notez la valeur (ex: 750).
+Choisir un soeuil a michemin
+
+
+*/
