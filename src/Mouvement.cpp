@@ -15,11 +15,77 @@ float vitesse_Droite = 0.426*SpeedMult;
 
 int temps = 1000; // temps de déplacement en ms
 
+namespace {
+const float KP = 1.0;
+const float KI = 0.40;
+const float KD = 0.15;
+const float dt = 0.01;
+
+float vitesseLeft = 0.0;
+float vitesseRight = 0.0;
+const float pulseCibleLeft = 50.63;
+const float pulseCibleRight = 50.0;
+float integrale = 0.0;
+float erreurPrecedenteLeft = 0.0;
+float erreurPrecedenteRight = 0.0;
+
+
+
+float calculPid(int32_t pulse, float vitesse, float &integrale,
+                float &erreurPrecedente, float pulseCible) {
+  float erreur = pulseCible - pulse;
+  integrale += erreur * dt;
+  float derivee = (erreur - erreurPrecedente) / dt;
+  float correction = KP * erreur + KI * integrale + KD * derivee;
+  erreurPrecedente = erreur;
+
+  return vitesse + correction * 0.0001;
+}
+}
+
+
+
+
+
 
 // Arrete les deux moteurs en envoyant une vitesse nulle.
 void arret(){
   MOTOR_SetSpeed(RIGHT, 0);
   MOTOR_SetSpeed(LEFT, 0);
+}
+
+void avance(){
+  MOTOR_SetSpeed(LEFT, vitesseLeft);
+  MOTOR_SetSpeed(RIGHT, vitesseRight);
+}
+
+void recule(){
+  MOTOR_SetSpeed(LEFT, -0.5*vitesseLeft);
+  MOTOR_SetSpeed(RIGHT, -0.5*vitesseRight);
+}
+
+void tourneDroit(){
+  MOTOR_SetSpeed(LEFT, 0.5*vitesseLeft);
+  MOTOR_SetSpeed(RIGHT, -0.5*vitesseRight);
+}
+
+void tourneGauche(){
+  MOTOR_SetSpeed(LEFT, -0.5*vitesseLeft);
+  MOTOR_SetSpeed(RIGHT, 0.5*vitesseRight);
+}
+
+void avanceDroit(){
+  int32_t encLeft = ENCODER_Read(LEFT);
+  int32_t encRight = ENCODER_Read(RIGHT);
+  avance();
+  vitesseLeft = calculPid(encLeft, vitesseLeft, integrale,
+                          erreurPrecedenteLeft, pulseCibleLeft);
+  vitesseRight = calculPid(encRight, vitesseRight, integrale,
+                           erreurPrecedenteRight, pulseCibleRight);
+
+  ENCODER_Reset(LEFT);
+  ENCODER_Reset(RIGHT);
+  delay(10);
 }
 /* Ancien avant arriere 
 // Une vitesse positive fait avancer chaque moteur.
