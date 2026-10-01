@@ -23,12 +23,6 @@ Variables globales et defines
  -> L'ensemble des fonctions y ont acces
 */
 
-//********CONSTANTES*******//
-#define KP 1
-#define KI 0.40
-#define KD 0.15
-#define dt 0.01
-
 const int vertPin = 48;
 const int rougePin = 49;
 
@@ -39,21 +33,6 @@ bool rouge = false;
 int etat = 0; // = 0 arrêt 1 = avance 2 = recule 3 = TourneDroit 4 = TourneGauche
 int etatPast = 0;
 int count = 0;
-
-float vitesseLeft = 0.0;
-float vitesseRight = 0.0;
-int32_t countEncLeft = 0;
-int32_t countEncRight = 0;
-
-// variables PID
-float pulseCibleLeft = 50.63; // a tweak
-float pulseCibleRight = 50; //a tweak
-float integrale = 0;
-float derivee = 0;
-float correction = 0;
-float erreurPrecedenteLeft = 0;
-float erreurPrecedenteRight = 0;
-
 
 /*
 Vos propres fonctions sont creees ici
@@ -67,49 +46,6 @@ void beep(int count){
     delay(100);  
   }
   delay(400);
-}
-
-void arret(){
-  MOTOR_SetSpeed(RIGHT, 0);
-  MOTOR_SetSpeed(LEFT, 0);
-}
-
-void avance(){
-  MOTOR_SetSpeed(LEFT, vitesseLeft);
-  MOTOR_SetSpeed(RIGHT, vitesseRight);
-}
-
-void recule(){
-  MOTOR_SetSpeed(LEFT, -0.5*vitesseLeft);
-  MOTOR_SetSpeed(RIGHT, -0.5*vitesseRight);
-}
-
-void tourneDroit(){
-  MOTOR_SetSpeed(LEFT, 0.5*vitesseLeft);
-  MOTOR_SetSpeed(RIGHT, -0.5*vitesseRight);
-}
-
-void tourneGauche(){
-  MOTOR_SetSpeed(LEFT, -0.5*vitesseLeft);
-  MOTOR_SetSpeed(RIGHT, 0.5*vitesseRight);
-}
-
-float calculPid(int pulse, float vitesse, float &erreurPrecedente, float pulseCible){
-  float erreur = pulseCible - pulse;
-  
-  integrale += erreur * dt;
-  derivee = (erreur - erreurPrecedente) / dt;
-  correction = KP * erreur + KI * integrale + KD * derivee;
-
-  erreurPrecedente = erreur;
-
-  return vitesse + correction*0.0001; 
-}
-
-void avanceDroit(int32_t encLeft, int32_t encRight){
-  avance();
-  vitesseLeft = calculPid(encLeft, vitesseLeft, erreurPrecedenteLeft, pulseCibleLeft);
-  vitesseRight = calculPid(encRight, vitesseRight, erreurPrecedenteRight, pulseCibleRight);
 }
 
 /*
@@ -154,17 +90,7 @@ void loop() {
     return;
   }
 
-  int32_t encLeft = ENCODER_Read(LEFT);
-  int32_t encRight = ENCODER_Read(RIGHT);
-
-  avanceDroit(encLeft, encRight);
-  
-  countEncLeft += encLeft;
-  countEncRight += encRight;
-  
-  ENCODER_Reset(LEFT);
-  ENCODER_Reset(RIGHT);
-  delay(10);
+  avanceDroit();
 
 
   // etatPast = etat;
