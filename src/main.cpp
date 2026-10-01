@@ -49,8 +49,8 @@ int32_t countEncLeft = 0;
 int32_t countEncRight = 0;
 
 // variables PID
-float pulseCibleLeft = 50.63;
-float pulseCibleRight = 50;
+float pulseCibleLeft = 50.63; // a tweak
+float pulseCibleRight = 50; //a tweak
 float integrale = 0;
 float derivee = 0;
 float correction = 0;
