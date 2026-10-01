@@ -1,4 +1,4 @@
-#include <DetercteurProximite.h>
+#include <DetecteurProximite.h>
 #include <Mouvement.h>
 
 // Pins des deux capteurs et dernieres valeurs lues.
