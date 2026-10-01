@@ -44,6 +44,28 @@ float calculPid(int32_t pulse, float vitesse, float &integrale,
 }
 
 
+namespace{
+const float KP = 1.0;
+const float KI = 0.40;
+const float KD = 0.15;
+const float dt = 0.01;
+
+float integrale = 0.0
+float erreurPrecedente = 0.0
+
+float calculPidAngle(float erreur, float &integrale,float &erreurPrecedente) {
+  integrale += erreur * dt;
+  float derivee = (erreur - erreurPrecedente) / dt;
+  float correction = KP * erreur + KI * integrale + KD * derivee;
+  erreurPrecedente = erreur;
+
+  return correction;
+
+
+
+}
+}
+
 
 
 
@@ -87,6 +109,29 @@ void avanceDroit(){
   ENCODER_Reset(RIGHT);
   delay(10);
 }
+
+void tournerDroite(){
+  const float angleCibleDroite = 0.1
+
+  int32_t encLeft = ENCODER_Read(LEFT);
+  int32_t encRight = ENCODER_Read(RIGHT);
+
+  float angleActuel = (encRight-encLeft);
+  float erreur = angleCibleDroite - angleActuel;
+
+  float correction = calculPidAngle(erreur, integrale, erreurPrecedente); 
+  int base = 50 ;
+
+  vitesseLeft = (-base + correction);
+  vitesseRight = (base - correction);
+
+MOTOR_SetSpeed(RIGHT,vitesseRight );
+MOTOR_SetSpeed(LEFT,vitesseLeft );
+
+
+}
+
+
 /* Ancien avant arriere 
 // Une vitesse positive fait avancer chaque moteur.
 void avance(){
