@@ -2,9 +2,8 @@
 #define SON_H
 
 
-const int Seuil_Tension = 600; // Exemple de seuil random a ajuster
-const int PIN_SON = A0; //pas la bonne pin a changer
-
+const int Seuil_Tension = 500; //  seuil  d activation 
+const int PIN_SON = A1; //pin sur Arduino robot B 
 // Joue un nombre donne de bips courts.
 void beep(int count);
 
