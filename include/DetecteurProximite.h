@@ -1,5 +1,5 @@
-#ifndef DETERCTEUR_PROXIMITE_H
-#define DETERCTEUR_PROXIMITE_H
+#ifndef DETECTEUR_PROXIMITE_H
+#define DETECTEUR_PROXIMITE_H
 
 #include <Arduino.h>
 

@@ -28,10 +28,6 @@ bool bumperArr; //3
 int posX = 0;
 int posY = 0;
 
-int vertpin = 48;
-int rougepin = 49; 
-bool vert = false;
-bool rouge = false;
 int etat = 0; // = 0 arrêt 1 = avance 2 = recule 3 = TourneDroit 4 = TourneGauche
 int etatPast = 0;
 
