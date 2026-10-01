@@ -27,13 +27,15 @@ Variables globales et defines
 */
 
 //********CONSTANTES*******//
-#define VERT_PIN 48
-#define ROUGE_PIN 49
 #define KP 1
 #define KI 0.40
 #define KD 0.15
 #define dt 0.01
 
+const int vertPin = 48;
+const int rougePin = 49;
+
+//********VARIABLES********//
 bool bumperArr; //variable vrai ou faux
 bool vert = false;
 bool rouge = false;
@@ -41,19 +43,20 @@ int etat = 0; // = 0 arrêt 1 = avance 2 = recule 3 = TourneDroit 4 = TourneGauc
 int etatPast = 0;
 int count = 0;
 
-float vitesseM1 = 0.0;
-float vitesseM2 = 0.0;
+float vitesseLeft = 0.0;
+float vitesseRight = 0.0;
+int32_t countEncLeft = 0;
+int32_t countEncRight = 0;
 
 // variables PID
-float pulseCibleM1 = 50.63;
-float pulseCibleM2 = 50;
+float pulseCibleLeft = 50.63;
+float pulseCibleRight = 50;
 float integrale = 0;
 float derivee = 0;
 float correction = 0;
-float erreurPrecedenteM1 = 0;
-float erreurPrecedenteM2 = 0;
-int32_t countEnc1 = 0;
-int32_t countEnc2 = 0;
+float erreurPrecedenteLeft = 0;
+float erreurPrecedenteRight = 0;
+
 
 /*
 Vos propres fonctions sont creees ici
@@ -75,23 +78,23 @@ void arret(){
 }
 
 void avance(){
-  MOTOR_SetSpeed(LEFT, vitesseM1);
-  MOTOR_SetSpeed(RIGHT, vitesseM2);
+  MOTOR_SetSpeed(LEFT, vitesseLeft);
+  MOTOR_SetSpeed(RIGHT, vitesseRight);
 }
 
 void recule(){
-  MOTOR_SetSpeed(LEFT, -0.5*vitesseM1);
-  MOTOR_SetSpeed(RIGHT, -0.5*vitesseM2);
+  MOTOR_SetSpeed(LEFT, -0.5*vitesseLeft);
+  MOTOR_SetSpeed(RIGHT, -0.5*vitesseRight);
 }
 
 void tourneDroit(){
-  MOTOR_SetSpeed(LEFT, 0.5*vitesseM1);
-  MOTOR_SetSpeed(RIGHT, -0.5*vitesseM2);
+  MOTOR_SetSpeed(LEFT, 0.5*vitesseLeft);
+  MOTOR_SetSpeed(RIGHT, -0.5*vitesseRight);
 }
 
 void tourneGauche(){
-  MOTOR_SetSpeed(LEFT, -0.5*vitesseM1);
-  MOTOR_SetSpeed(RIGHT, 0.5*vitesseM2);
+  MOTOR_SetSpeed(LEFT, -0.5*vitesseLeft);
+  MOTOR_SetSpeed(RIGHT, 0.5*vitesseRight);
 }
 
 float calculPid(int pulse, float vitesse, float &erreurPrecedente, float pulseCible){
@@ -106,10 +109,10 @@ float calculPid(int pulse, float vitesse, float &erreurPrecedente, float pulseCi
   return vitesse + correction*0.0001; 
 }
 
-void avanceDroit(int encodeur1, int encodeur2){
+void avanceDroit(int32_t encLeft, int32_t encRight){
   avance();
-  vitesseM1 = calculPid(encodeur1, vitesseM1, erreurPrecedenteM1, pulseCibleM1);
-  vitesseM2 = calculPid(encodeur2, vitesseM2, erreurPrecedenteM2, pulseCibleM2);
+  vitesseLeft = calculPid(encLeft, vitesseLeft, erreurPrecedenteLeft, pulseCibleLeft);
+  vitesseRight = calculPid(encRight, vitesseRight, erreurPrecedenteRight, pulseCibleRight);
 }
 
 /*
@@ -121,8 +124,8 @@ Fonctions d'initialisation (setup)
 void setup(){
   BoardInit();
   
-  pinMode(VERT_PIN, INPUT);
-  pinMode(ROUGE_PIN, INPUT);
+  pinMode(vertPin, INPUT);
+  pinMode(rougePin, INPUT);
   delay(100);
   Serial.println("Initialisation complete");
 }
@@ -146,16 +149,16 @@ void loop() {
     return;
   }
 
-  int32_t enc1 = ENCODER_Read(0);
-  int32_t enc2 = ENCODER_Read(1);
+  int32_t encLeft = ENCODER_Read(LEFT);
+  int32_t encRight = ENCODER_Read(RIGHT);
 
-  avanceDroit(enc1, enc2);
+  avanceDroit(encLeft, encRight);
   
-  countEnc1 += enc1;
-  countEnc2 += enc2;
+  countEncLeft += encLeft;
+  countEncRight += encRight;
   
-  ENCODER_Reset(0);
-  ENCODER_Reset(1);
+  ENCODER_Reset(LEFT);
+  ENCODER_Reset(RIGHT);
   delay(10);
 
 
@@ -172,8 +175,8 @@ void loop() {
   //   }
   // }
   
-  // vert = digitalRead(VERT_PIN);
-  // rouge = digitalRead(ROUGE_PIN);
+  // vert = digitalRead(vertPin);
+  // rouge = digitalRead(rougePin);
   // if (etat > 0){
   //   if (vert && rouge){ // aucun obstacle => avance
   //     etat = 1;
