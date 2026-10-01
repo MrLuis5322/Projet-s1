@@ -25,6 +25,16 @@ bool bumperDr; //1
 bool bumperAv; //2
 bool bumperArr; //3
 
+int posX = 0;
+int posY = 0;
+
+int vertpin = 48;
+int rougepin = 49; 
+bool vert = false;
+bool rouge = false;
+int etat = 0; // = 0 arrêt 1 = avance 2 = recule 3 = TourneDroit 4 = TourneGauche
+int etatPast = 0;
+
 // Etat et reglages partages avec main.cpp et DetercteurProximite.cpp.
 // Le header les declare avec extern; ces lignes en sont les definitions uniques.
 int etat = 0; // = 0 arrêt 1 = avance 2 = recule 3 = TourneDroit 4 = TourneGauche
@@ -52,7 +62,49 @@ void setup(){
 Fonctions de boucle infini
  -> Se fait appeler perpetuellement suite au "setup"
 */
+
+  Serial.print("Valeur lue: ");
+  Serial.println((analogRead(PIN_SON)));
+
+/*
+Vos propres fonctions sont creees ici
+*/
+
+void beep(int count){
+  for(int i=0;i<count;i++){
+    AX_BuzzerON();
+    delay(100);
+    AX_BuzzerOFF();
+    delay(100);  
+  }
+  delay(400);
+}
+/*
+Fonctions d'initialisation (setup)
+ -> Se fait appeler au debut du programme
+ -> Se fait appeler seulement un fois
+ -> Generalement on y initilise les varibbles globales
+*/
+void setup(){
+  BoardInit();
+  Serial.begin(115200);
+  ENCODER_Reset(0);
+  ENCODER_Reset(1);
+  //initialisation
+  pinMode(vertpin, INPUT);
+  pinMode(rougepin, INPUT);
+  delay(100);
+  beep(1);
+}
+
+/*
+Fonctions de boucle infini
+ -> Se fait appeler perpetuellement suite au "setup"
+*/
+
+
 void loop() {
+
   etatPast = etat;
   bumperArr = ROBUS_IsBumper(3);
   if (bumperArr){
@@ -65,58 +117,49 @@ void loop() {
       etat = 0;
     }
   }
-// Tourner a gauche
-   bumperGa = ROBUS_IsBumper(0);
+
+  bumperGa = ROBUS_IsBumper(0);
   if (bumperGa){
-      tourneGauche90();
+   for (int i = 0; i < 4; i++) {
+      tourne(-90);
+      delay(500);
   }
-// Tourner a droite
+ }
   bumperDr = ROBUS_IsBumper(1);
   if (bumperDr){
-      tourneDroite90();
+    for (int i = 0; i < 4; i++) {
+      tourne(90);
+      delay(500);
+    }
   }
-  // Test avancer pour determiner la vitesse
+  
   bumperAv = ROBUS_IsBumper(2);
   if (bumperAv){
-      mouvementAvant(1000);
+    mouvementAvant(50);
   }
 
-  mettreAJourEtatAvecDetecteurs();
+  vert = digitalRead(vertpin);
+  rouge = digitalRead(rougepin);
+  if (etat > 0){
+    if (vert && rouge){ // aucun obstacle => avance
+      etat = 1;
+    }
+    if (!vert && !rouge){  // obstacle devant => recule
+      etat = 2;
+    }
+    if (!vert && rouge){ // obstacle à gauche => tourne droite
+        etat = 3;
+      }
+    if (vert && !rouge){ // obstacle à droite => tourne gauche
+        etat = 4;
+    }
+  }
 
   if (etatPast != etat){
     arret();
     delay(50);
   }
-  else{
-    switch (etat)
-    {
-    case 0:
-      arret();
-      break;
-    case 1:
-      mouvementAvant(1000);
-      break;
-    case 2:
-      mouvementArriere(1000);
-      break;
-    case 3:
-      tourneDroite90();
-      break;
-    case 4:
-      tourneGauche90();
-      break;            
-    default:
-      mouvementAvant(1000);
-      etat = 1;
-    break;
-    }
-  }
-  delay(200);
-
-  Serial.print("Valeur lue: ");
-  Serial.println((analogRead(PIN_SON)));
 }
-
 
 
 

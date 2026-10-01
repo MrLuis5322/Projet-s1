@@ -7,10 +7,7 @@ extern float vitesse_Gauche;
 extern float vitesse_Droite;
 
 void arret();
-void avance();
-void recule();
-void tourneDroite90();
-void tourneGauche90();
-void mouvementAvant(float temps);
-void mouvementArriere(float temps);
+void tourne(float angleDegres);
+void mouvementAvant(float DistanceCM);
+
 #endif
