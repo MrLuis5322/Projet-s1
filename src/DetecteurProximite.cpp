@@ -2,8 +2,9 @@
 #include <Mouvement.h>
 
 // Pins des deux capteurs et dernieres valeurs lues.
-const int vertpin = 48;
-const int rougepin = 49;
+const int vertpin = 49;
+const int rougepin = 48;
+bool ObstacleDetecte = false;
 bool vert = false;
 bool rouge = false;
 
@@ -13,26 +14,16 @@ void initialiserDetecteurProximite() {
   pinMode(rougepin, INPUT);
 }
 
-// Lit les capteurs et traduit leur combinaison en mouvement.
-// Les constantes ETAT_* sont definies dans DetercteurProximite.h.
-void mettreAJourEtatAvecDetecteurs() {
+// Met a jour Vert et Rouge et renvoie si besoin d'arret
+void detecterObstacle() {
+
   vert = digitalRead(vertpin);
   rouge = digitalRead(rougepin);
 
-  // Un robot a l'arret reste arrete jusqu'a ce qu'une autre logique le demarre.
-  if (etat > ETAT_ARRET) {
-    // Les deux capteurs voient la voie libre: avancer.
-    if (vert && rouge) {
-      etat = ETAT_AVANCE;
-    // Les deux capteurs detectent un obstacle: reculer.
-    } else if (!vert && !rouge) {
-      etat = ETAT_RECULE;
-    // Obstacle a gauche: tourner a droite.
-    } else if (!vert && rouge) {
-      etat = ETAT_TOURNE_DROIT;
-    // Obstacle a droite: tourner a gauche.
-    } else {
-      etat = ETAT_TOURNE_GAUCHE;
-    }
-  }
+  if (!(vert && rouge) or !vert or !rouge) {
+    ObstacleDetecte = true;
+    Serial.println("Obstacle detecte");
+  }  
+  
+  
 }
