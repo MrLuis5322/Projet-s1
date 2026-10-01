@@ -1,26 +1,20 @@
-//
-// !!! WARNING !!! AUTO-GENERATED FILE!
-// PLEASE DO NOT MODIFY IT AND USE "platformio.ini":
-// https://docs.platformio.org/page/projectconf/section_env_build.html#build-flags
-//
 {
     "configurations": [
         {
             "name": "PlatformIO",
             "includePath": [
-                "C:/Users/lolui/Desktop/Programation/Robus/include",
-                "C:/Users/lolui/Desktop/Programation/Robus/src",
-                "C:/Users/lolui/Desktop/Programation/Robus/lib/LibRobUS-master/src",
-                "C:/Users/lolui/Desktop/Programation/Robus/lib",
-                "C:/Users/lolui/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
-                "C:/Users/lolui/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
-                "C:/Users/lolui/.platformio/packages/framework-arduino-avr/libraries/SoftwareSerial/src",
-                "C:/Users/lolui/.platformio/packages/framework-arduino-avr/cores/arduino",
-                "C:/Users/lolui/.platformio/packages/framework-arduino-avr/variants/mega",
-                "C:/Users/lolui/Desktop/Programation/Robus/lib/LibRobus",
-                "C:/Users/lolui/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
-                "C:/Users/lolui/.platformio/packages/framework-arduino-avr/libraries/HID/src",
-                ""
+                "C:\\Users\\gelol\\OneDrive - USherbrooke\\Automne 2026 - S1\\Projet\\Programmation\\Projet-s1\\include",
+                "C:\\Users\\gelol\\OneDrive - USherbrooke\\Automne 2026 - S1\\Projet\\Programmation\\Projet-s1\\src",
+                "C:\\Users\\gelol\\OneDrive - USherbrooke\\Automne 2026 - S1\\Projet\\Programmation\\Projet-s1\\lib\\LibRobUS-master\\src",
+                "C:\\Users\\gelol\\OneDrive - USherbrooke\\Automne 2026 - S1\\Projet\\Programmation\\Projet-s1\\lib",
+                "C:\\Users\\gelol\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src",
+                "C:\\Users\\gelol\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src",
+                "C:\\Users\\gelol\\.platformio\\packages\\framework-arduino-avr\\libraries\\SoftwareSerial\\src",
+                "C:\\Users\\gelol\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino",
+                "C:\\Users\\gelol\\.platformio\\packages\\framework-arduino-avr\\variants\\mega",
+                "C:\\Users\\gelol\\OneDrive - USherbrooke\\Automne 2026 - S1\\Projet\\Programmation\\Projet-s1\\lib\\LibRobus",
+                "C:\\Users\\gelol\\.platformio\\packages\\framework-arduino-avr\\libraries\\EEPROM\\src",
+                "C:\\Users\\gelol\\.platformio\\packages\\framework-arduino-avr\\libraries\\HID\\src"
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
