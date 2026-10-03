@@ -1,158 +1,66 @@
-/*
-Projet: Le nom du script
-Equipe: 13
-Auteurs: Les membres auteurs du script
-Description: Breve description du script
-Date: 24/09/2026
-*/
+//**************************************
+// Projet: Labyrinthe-S1
+// Fichiers: Mouvement.cpp
+// Equipe: 13-A
+// Auteurs: 
+// Description: Breve description du script
+// Date: 24/09/2026
+//***************************************
 
-
-/*
-Get-Location
-Test-Path .\platformio.ini
-Test-Path .\lib\Robus\Robus.h
-
-*/
-
-/*
-Inclure les librairies de functions que vous voulez utiliser
-*/
+//*********INCLUDES********//
 #include <LibRobus.h>
-// a essayer #include <Robus/Robus.h>
 #include <Arduino.h>
+#include "Mouvement.h"
 
-/*
-Variables globales et defines
- -> defines...
- -> L'ensemble des fonctions y ont acces
-*/
+//********CONSTANTES*******//
+#define EN_MARCHE 1
+#define ARRET 0
 
+const int vertPin = 48;
+const int rougePin = 49;
+
+
+//********VARIABLES********//
 bool bumperArr; //variable vrai ou faux
-int vertpin = 48; //nombre entier
-int rougepin = 49;
 bool vert = false;
 bool rouge = false;
 int etat = 0; // = 0 arrêt 1 = avance 2 = recule 3 = TourneDroit 4 = TourneGauche
 int etatPast = 0;
-float vitesse = 0.40; //nombre avec des decimales
 
-/*
-Vos propres fonctions sont creees ici
-*/
-
-void beep(int count){
-  for(int i=0;i<count;i++){
-    AX_BuzzerON();
-    delay(100);
-    AX_BuzzerOFF();
-    delay(100);  
-  }
-  delay(400);
-}
-
-void arret(){
-  MOTOR_SetSpeed(RIGHT, 0);
-  MOTOR_SetSpeed(LEFT, 0);
-};
-
-void avance(){
-  MOTOR_SetSpeed(RIGHT,vitesse);
-  MOTOR_SetSpeed(LEFT, vitesse);
-};
-
-void recule(){
-  MOTOR_SetSpeed(RIGHT, -0.5*vitesse);
-  MOTOR_SetSpeed(LEFT, -vitesse);
-};
-
-void tourneDroit(){
-  MOTOR_SetSpeed(RIGHT, 0.5*vitesse);
-  MOTOR_SetSpeed(LEFT, -0.5*vitesse);
-};
-
-void tourneGauche(){
-  MOTOR_SetSpeed(RIGHT, -0.5*vitesse);
-  MOTOR_SetSpeed(LEFT, 0.5*vitesse);
-};
-
-/*
-Fonctions d'initialisation (setup)
- -> Se fait appeler au debut du programme
- -> Se fait appeler seulement un fois
- -> Generalement on y initilise les varibbles globales
-*/
+//********FONCTIONS********//
 void setup(){
   BoardInit();
   
-  //initialisation
-  pinMode(vertpin, INPUT);
-  pinMode(rougepin, INPUT);
+  pinMode(vertPin, INPUT);
+  pinMode(rougePin, INPUT);
   delay(100);
-  beep(3);
+  Serial.println("Initialisation complete");
 }
 
-/*
-Fonctions de boucle infini
- -> Se fait appeler perpetuellement suite au "setup"
-*/
 void loop() {
-  etatPast = etat;
-  bumperArr = ROBUS_IsBumper(3);
-  if (bumperArr){
-    if (etat == 0){
-      beep(2);
-      etat = 1;
-    } 
-    else{
-      beep(1);
-      etat = 0;
-    }
+
+  //Test encodeurs PID
+  if(ROBUS_IsBumper(3)){
+    etat = EN_MARCHE;
   }
-  
-  vert = digitalRead(vertpin);
-  rouge = digitalRead(rougepin);
-  if (etat > 0){
-    if (vert && rouge){ // aucun obstacle => avance
-      etat = 1;
-    }
-    if (!vert && !rouge){  // obstacle devant => recule
-      etat = 2;
-    }
-    if (!vert && rouge){ // obstacle à gauche => tourne droit
-        etat = 3;
-      }
-    if (vert && !rouge){ // obstacle à droite => tourne gauche
-        etat = 4;
-    }
+  if(ROBUS_IsBumper(2)){
+    etat = ARRET;
+    arret();
+  }
+  if(!etat){
+    return;
   }
 
-  if (etatPast != etat){
-    arret();
-    delay(50);
-  }
-  else{
-    switch (etat)
-    {
-    case 0:
-      arret();
-      break;
-    case 1:
-      avance();
-      break;
-    case 2:
-      recule();
-      break;
-    case 3:
-      tourneDroit();
-      break;
-    case 4:
-      tourneGauche();
-      break;            
-    default:
-      avance();
-      etat = 1;
-    break;
-    }
-  }
-  delay(200);
+  encLeft = ENCODER_Read(LEFT);
+  encRight = ENCODER_Read(RIGHT);
+
+  avanceDroit();
+
+  countEncLeft += encLeft;
+  countEncRight += encRight;
+
+  ENCODER_Reset(LEFT);
+  ENCODER_Reset(RIGHT);
+  delay(10);
 }
+
