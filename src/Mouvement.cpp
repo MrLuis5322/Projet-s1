@@ -2,11 +2,12 @@
 Mouvement - P13
 Alexandre H.
 Code pour faire bouger et tourner le robot
-24/09/2026
+01/10/2026
 */
 
 #include <LibRobus.h>
 #include <Mouvement.h>
+#include <DetecteurProximite.h>
 
 
 const float DiametreRoue = 7.8; // TOUT est en CM
@@ -22,7 +23,7 @@ const float CIRCONFERENCE_TOURNER = 3.14159*ECART_ROUES;
 float facteur_vitesse = 1.5;
 
 float vitesse_Gauche = 0.40*facteur_vitesse;
-float vitesse_Droite = 0.424*facteur_vitesse;
+float vitesse_Droite = 0.415*facteur_vitesse;
 
 float facteur_vitesse_tourne = 1;
 float vitesse_Gauche_Tourne = 0.40*facteur_vitesse_tourne;
@@ -49,32 +50,42 @@ void mouvementAvant(float distanceCM) {
 
   ENCODER_Reset(0);
   ENCODER_Reset(1);
-  /*
-  Serial.print("Distance demandee: ");
-  Serial.print(distanceCM);
-  Serial.println(" cm");
-  Serial.print("Cible gauche: ");
-  Serial.println(CibleG);
-  Serial.print("Cible droite: ");
-  Serial.println(CibleD);
-  */
+  
   MOTOR_SetSpeed(LEFT, vitesse_Gauche);
   MOTOR_SetSpeed(RIGHT, vitesse_Droite);
 
 
-  bool ralentissement = false;
+  bool ralentissement1 = false;
+  bool ralentissement2 = false;
 
   while (ENCODER_Read(0) < CibleG && ENCODER_Read(1) < CibleD) {
+    
     long encodeurG = ENCODER_Read(0);
     long encodeurD = ENCODER_Read(1);
-
+    Serial.print("Encodeur G: ");
+    Serial.println(encodeurG);
+    Serial.print("Encodeur D: ");
+    Serial.println(encodeurD);
+    detecterObstacle();
+    if (ObstacleDetecte == true) {
+      annulerMouvement();
+      ObstacleDetecte = false;
+      break;
+        }
     
-    if (!ralentissement &&
-        encodeurG >= CibleG * 0.95 &&
-        encodeurD >= CibleD * 0.95) {
-      MOTOR_SetSpeed(LEFT, vitesse_Gauche*0.5);
-      MOTOR_SetSpeed(RIGHT, vitesse_Droite*0.5);
-      ralentissement = true;
+    if (!ralentissement1 &&
+        encodeurG >= CibleG -700 &&
+        encodeurD >= CibleD -700) {
+      MOTOR_SetSpeed(LEFT, vitesse_Gauche*0.7);
+      MOTOR_SetSpeed(RIGHT, vitesse_Droite*0.7);
+      ralentissement1 = true;
+    }
+    if (!ralentissement2 &&
+        encodeurG >= CibleG -400 &&
+        encodeurD >= CibleD -400) {
+      MOTOR_SetSpeed(LEFT, vitesse_Gauche*0.35);
+      MOTOR_SetSpeed(RIGHT, vitesse_Droite*0.35);
+      ralentissement2 = true;
     }
 
     delay(1);
@@ -82,6 +93,8 @@ void mouvementAvant(float distanceCM) {
 
   arret();
 }
+
+
 
 void tourne(float angleDegres) { 
   float distanceRoue = (abs(angleDegres) * CIRCONFERENCE_TOURNER) / 360; // distance parcourue par chaque roue pour tourner de angleDegres
@@ -109,5 +122,49 @@ while (abs(ENCODER_Read(0)) < CibleG && abs(ENCODER_Read(1)) < CibleD) {
   }
 
   arret();
+
+}
+
+
+void annulerMouvement() {
+
+  arret();
+  delay(300);
+  int EncodeurInitialG = ENCODER_Read(0);
+  int EncodeurInitialD = ENCODER_Read(1);
+  long CibleG = 700;
+  long CibleD = 700;
+  
+  MOTOR_SetSpeed(LEFT, -vitesse_Gauche*0.35);
+  MOTOR_SetSpeed(RIGHT, -vitesse_Droite*0.3);
+
+  bool fast = false;
+  bool topspeed = false;
+
+  while (ENCODER_Read(0) > CibleG && ENCODER_Read(1) > CibleD) {
+    
+    long encodeurG = ENCODER_Read(0);
+    long encodeurD = ENCODER_Read(1);
+
+     if (!fast &&
+        encodeurG <= EncodeurInitialG - 250 &&
+        encodeurD <= EncodeurInitialD - 250) {
+      MOTOR_SetSpeed(LEFT, -vitesse_Gauche*0.7);
+      MOTOR_SetSpeed(RIGHT, -vitesse_Droite*0.6);
+      fast = true;
+    }
+    if (!topspeed &&
+        encodeurG <= EncodeurInitialG - 500 &&
+        encodeurD <= EncodeurInitialD - 500) {
+      MOTOR_SetSpeed(LEFT, -vitesse_Gauche*1.2);
+      MOTOR_SetSpeed(RIGHT, -vitesse_Droite*1);
+      topspeed = true;
+    }
+
+    delay(1);
+  }
+  arret();
+  ObstacleDetecte = false;
+
 
 }

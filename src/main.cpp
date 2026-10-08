@@ -1,75 +1,37 @@
 /*
-Main - P13
-Auteurs: Alexandre H., Luis 
-Description: Breve description du script
-Date: 29/09/2026
+Projet: Main - P13
+Auteurs: Alexandre H., Luis
+Description: Code pour sortie du labyrinthe
+Date : 01/10/2026
 */
 
 /*
-librairies de functions a utiliser
+Inclure les librairies de functions que vous voulez utiliser
 */
-#include <Arduino.h>
+
 #include <LibRobus.h>
-#include "DetecteurProximite.h"
-#include "Mouvement.h"
+#include <Mouvement.h>
+#include <DetecteurProximite.h>
 #include "Son.h"
 
 /*
 Variables globales et defines
- -> defines...
- -> L'ensemble des fonctions y ont acces
 */
+int posX = 2; // 1,2,3
+int posY = 1; // 1 - 10 (Goal)
+bool goal = false; //
+
 
 bool bumperGa; //0
 bool bumperDr; //1
 bool bumperAv; //2
 bool bumperArr; //3
 
-int posX = 0;
-int posY = 0;
-
-int vertpin = 48;
-int rougepin = 49; 
-bool vert = false;
-bool rouge = false;
-int etat = 0; // = 0 arrêt 1 = avance 2 = recule 3 = TourneDroit 4 = TourneGauche
+int etat = 0; // = 0=Arret 1=Avance 2=Droite 3=Gauche 4=Recule 
 int etatPast = 0;
-
-// Etat et reglages partages avec main.cpp et DetercteurProximite.cpp.
-// Le header les declare avec extern; ces lignes en sont les definitions uniques.
-int etat = 0; // = 0 arrêt 1 = avance 2 = recule 3 = TourneDroit 4 = TourneGauche
-int etatPast = 0;
-/*
-Fonctions d'initialisation (setup)
- -> Se fait appeler au debut du programme
- -> Se fait appeler seulement un fois
- -> Generalement on y initilise les varibbles globales
-*/
-
-void setup(){
-  BoardInit();
-  initialiserSon();
-  initialiserDetecteurProximite();
-  delay(100);
-  beep(3);
-
-//test
-  Serial.begin(9600);
-
-}
+bool robotDemarre = false; 
 
 /*
-Fonctions de boucle infini
- -> Se fait appeler perpetuellement suite au "setup"
-*/
-
-  Serial.print("Valeur lue: ");
-  Serial.println((analogRead(PIN_SON)));
-
-/*
-Vos propres fonctions sont creees ici
-*/
-
 void beep(int count){
   for(int i=0;i<count;i++){
     AX_BuzzerON();
@@ -79,87 +41,56 @@ void beep(int count){
   }
   delay(400);
 }
+*/
+
 /*
 Fonctions d'initialisation (setup)
- -> Se fait appeler au debut du programme
- -> Se fait appeler seulement un fois
- -> Generalement on y initilise les varibbles globales
 */
+
 void setup(){
   BoardInit();
+  initialiserDetecteurProximite();
   Serial.begin(115200);
   ENCODER_Reset(0);
   ENCODER_Reset(1);
-  //initialisation
   pinMode(vertpin, INPUT);
   pinMode(rougepin, INPUT);
-  delay(100);
+  delay(1000);
   beep(1);
+  initialiserSon();
 }
 
 /*
 Fonctions de boucle infini
- -> Se fait appeler perpetuellement suite au "setup"
 */
 
 
 void loop() {
 
-  etatPast = etat;
-  bumperArr = ROBUS_IsBumper(3);
-  if (bumperArr){
-    if (etat == 0){
-      beep(2);
-      etat = 1;
-    } 
-    else{
-      beep(1);
-      etat = 0;
-    }
-  }
-
-  bumperGa = ROBUS_IsBumper(0);
-  if (bumperGa){
-   for (int i = 0; i < 4; i++) {
-      tourne(-90);
-      delay(500);
-  }
- }
-  bumperDr = ROBUS_IsBumper(1);
-  if (bumperDr){
-    for (int i = 0; i < 4; i++) {
-      tourne(90);
-      delay(500);
-    }
-  }
-  
-  bumperAv = ROBUS_IsBumper(2);
-  if (bumperAv){
-    mouvementAvant(50);
-  }
-
-  vert = digitalRead(vertpin);
-  rouge = digitalRead(rougepin);
-  if (etat > 0){
-    if (vert && rouge){ // aucun obstacle => avance
-      etat = 1;
-    }
-    if (!vert && !rouge){  // obstacle devant => recule
-      etat = 2;
-    }
-    if (!vert && rouge){ // obstacle à gauche => tourne droite
-        etat = 3;
-      }
-    if (vert && !rouge){ // obstacle à droite => tourne gauche
-        etat = 4;
-    }
-  }
-
-  if (etatPast != etat){
+   // Attente signal 5 kHz
+  if (robotDemarre == false) {
     arret();
-    delay(50);
+    if (detecter5kHz()) {
+      robotDemarre = true;
+      beep(2);
+    }
+    return;
+  }
+
+
+  while (goal != true) {
+    Serial.println("Goal: ");
+
+    while (ObstacleDetecte == false) {
+      Serial.println(ObstacleDetecte);
+        mouvementAvant(250);
+        delay(5000);
+      }
+    
   }
 }
+
+  
 
 
 
