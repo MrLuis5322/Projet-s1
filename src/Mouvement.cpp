@@ -127,6 +127,7 @@ void avance(float distance){
     avanceDroit();
   }
   if(countEncLeft >= pulseArret && countEncRight >= pulseArret){
+    Serial.println("stop");
     arretPID(distancePulse);
   }
 }

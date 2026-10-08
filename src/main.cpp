@@ -28,6 +28,7 @@ int etat = 0; // = 0 arrêt 1 = avance 2 = recule 3 = TourneDroit 4 = TourneGauc
 int etatPast = 0;
 
 //********FONCTIONS********//
+/*
 void setup(){
   BoardInit();
   
@@ -64,3 +65,4 @@ void loop() {
   delay(10);
 }
 
+*/

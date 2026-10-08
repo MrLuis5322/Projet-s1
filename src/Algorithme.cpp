@@ -86,8 +86,14 @@ bool CapteurDetecteMur()
     int vert = digitalRead(48);
     int rouge = digitalRead(49);
 
-    if(!vert && !rouge) return true;
-    else return false;
+    if(!vert && !rouge){
+        Serial.println("3");
+        return true;
+    } 
+    else{
+        Serial.println("4");
+        return false;
+    } 
 }
 
 /*
@@ -97,8 +103,10 @@ Retour : Booléen true si il y a un mur ou une ligne de tape devant le robot. Si
 */
 bool MurDevant()
 {
-    if (memoire[x][y][direction] == 1)
+    if (memoire[x][y][direction] == 1){
+        Serial.println("2");
         return true;
+    }
     else if (CapteurDetecteMur()){
         memoire[x][y][direction] = 1;
         return true;
@@ -116,6 +124,7 @@ Retour : Rien.
 void Avancer(int p_nbCases)
 {
     avance(p_nbCases * 0.5);
+    delay(20000);
 
     switch (direction)
     {
@@ -144,16 +153,17 @@ Retour : Rien.
 */
 void Tourner(int p_angle)
 {
+    int p_direction = LEFT;
     if (p_angle < 0) {
-        int p_direction = RIGHT;
+        p_direction = RIGHT;
     }
     else if (p_angle > 0) {
-        int p_direction = LEFT;
+        p_direction = LEFT;
     }
     int nbQuartTourATourner = p_angle / 90;
 
     for (int i = 0; i < abs(nbQuartTourATourner); i++){
-        rotation90(LEFT);
+        rotation90(p_direction);
     }
 
     // FAIRE TOURNER LE ROBOT ICI
@@ -163,37 +173,73 @@ void Tourner(int p_angle)
 }
 
 /*
-Fonction : Dicter une séquence de mouvements lorsque le robot est immobile, face vers l'avant,
-           et qu'il n'a aucune information quant au tracé du labyrinthe à la hauteur où il se trouve.
+Fonction : Dicter une séquence de mouvements lorsque le robot est immobile, face vers l'arrière,
+           et qu'il sait qu'il doit revenir vers l'arrière afin de poursuivre son chemin.
 Entrée : Rien
 Retour : Rien.
 */
-void Devant()
+void Arriere()
 {
-    if (!MurDevant()) 
+    if (!MurDevant())
     {
-        if (y == 8) // Cas où le robot est à une case de la fin
-            Avancer(1);
-        else 
-            Avancer(2);
-        Devant();
-    }
-    else
-    {
-        if (y != 9)
+        Avancer(2);
+        MurDevant(); // Noter la présence d'un mur à l'arrière
+        if (c == 0) // Cas où on souhaite aller dans la colonne de gauche
         {
-            if (x == 0)
-                Droite();
-            else if (x == 2)
-                Gauche();
-            else if (x == 1) // Si le robot est au centre, on utilise la logique suivante 
-                             // afin qu'il ne choisisse pas le même côté que précédemment.
-            { // Alternance Droite-Gauche
-                nbChoixAleatoires++;
-                if (nbChoixAleatoires % 2 == 0)
-                    Droite();
-                else
-                    Gauche();
+            Tourner(-90);
+            if (!MurDevant())
+            {
+                Avancer(1);
+                if (x = c) // Si on se trouve dans la colonne souhaitée
+                {
+                    Tourner(-90);
+                    // Devant();
+                    return;
+                }
+                else if (!MurDevant()) // Sinon, continuer à avancer
+                {
+                    Avancer(1);
+                    if (x = c)
+                    {
+                        Tourner(-90);
+                        // Devant();
+                        return;
+                    }
+                }
+            }
+            else if (memoire[x][y][2] == 0)
+            {
+                Tourner(90);
+                Arriere();
+            }
+        }
+        if (c == 2)  // Cas où on souhaite aller dans la colonne de droite
+        {
+            Tourner(90);
+            if (!MurDevant())
+            {
+                Avancer(1);
+                if (x = c) // Si on se trouve dans la colonne souhaitée
+                {
+                    Tourner(90);
+                    // Devant();
+                    return;
+                }
+                else if (!MurDevant()) // Sinon, continuer à avancer
+                {
+                    Avancer(1);
+                    if (x = c)
+                    {
+                        Tourner(90);
+                        // Devant();
+                        return;
+                    }
+                }
+            }
+            else if (memoire[x][y][2] == 0)
+            {
+                Tourner(-90);
+                Arriere();
             }
         }
     }
@@ -207,11 +253,13 @@ Retour : Rien.
 */
 void Gauche()
 {
+    Serial.println("5");
     Tourner(90);
     if (MurDevant()) // Si présence d'un mur à gauche, alors aller plutôt à droite
     {
         Tourner(-90);
-        Droite();
+        // Droite();
+        return;
     }
     else
     {
@@ -219,7 +267,8 @@ void Gauche()
         MurDevant(); // Noter dans la mémoire la présence d'un mur à gauche ou non
         Tourner(-90);
         if (!MurDevant())
-            Devant();
+            // Devant();
+            return;
         else // Impossible de continuer à monter
         {
             if (memoire[x][y][1] == 0) // Si pas de mur à sa gauche
@@ -227,7 +276,8 @@ void Gauche()
             else
             {
                 if (memoire[x + 1][y][3] == 0) // Si la case de droite n'a pas de mur (ou inconnu) à sa droite
-                    Droite(); // Aller à droite
+                    // Droite(); // Aller à droite
+                    return;
                 else // Sinon, il faut reculer
                 {
                     for (int i = 0; i < 3; i++) // Noter quelle case de cette hauteur n'a pas été visitée
@@ -254,11 +304,13 @@ Retour : Rien.
 */
 void Droite()
 {
+    Serial.println("6");
     Tourner(-90);
     if (MurDevant())  // Si présence d'un mur à droite, alors aller plutôt à gauche
     {
         Tourner(90);
-        Gauche();
+        // Gauche();
+        return;
     }
     else
     {
@@ -266,7 +318,8 @@ void Droite()
         MurDevant();  // Noter dans la mémoire la présence d'un mur à droite ou non
         Tourner(90);
         if (!MurDevant())
-            Devant();
+            // Devant();
+            return;
         else
         {
             if (memoire[x][y][3] == 0) // Si pas de mur à sa droite
@@ -274,7 +327,8 @@ void Droite()
             else
             {
                 if (memoire[x - 1][y][1] == 0)  // Si la case de gauche n'a pas de mur (ou inconnu) à sa gauche
-                    Gauche();  // Aller à gauche
+                    // Gauche();  // Aller à gauche
+                    return;
                 else  // Sinon, il faut reculer
                 {
                     for (int i = 0; i < 3; i++)
@@ -294,82 +348,70 @@ void Droite()
 }
 
 /*
-Fonction : Dicter une séquence de mouvements lorsque le robot est immobile, face vers l'arrière,
-           et qu'il sait qu'il doit revenir vers l'arrière afin de poursuivre son chemin.
+Fonction : Dicter une séquence de mouvements lorsque le robot est immobile, face vers l'avant,
+           et qu'il n'a aucune information quant au tracé du labyrinthe à la hauteur où il se trouve.
 Entrée : Rien
 Retour : Rien.
 */
-void Arriere()
+void Devant()
 {
-    if (!MurDevant())
+    Serial.println("7");
+    if (!MurDevant()) 
     {
-        Avancer(2);
-        MurDevant(); // Noter la présence d'un mur à l'arrière
-        if (c == 0) // Cas où on souhaite aller dans la colonne de gauche
+        if (y == 8) // Cas où le robot est à une case de la fin
         {
-            Tourner(-90);
-            if (!MurDevant())
-            {
-                Avancer(1);
-                if (x = c) // Si on se trouve dans la colonne souhaitée
-                {
-                    Tourner(-90);
-                    Devant();
-                }
-                else if (!MurDevant()) // Sinon, continuer à avancer
-                {
-                    Avancer(1);
-                    if (x = c)
-                    {
-                        Tourner(-90);
-                        Devant();
-                    }
-                }
-            }
-            else if (memoire[x][y][2] == 0)
-            {
-                Tourner(90);
-                Arriere();
+            Avancer(1);
+            Serial.println("9");
+        }
+        else {
+            Avancer(2);
+            Serial.println("8");
+        }
+            
+        Devant();
+    }
+    else
+    {
+        Serial.println("10");
+        if (y != 9)
+        {
+            if (x == 0)
+                Droite();
+            else if (x == 2)
+                Gauche();
+            else if (x == 1) // Si le robot est au centre, on utilise la logique suivante 
+                             // afin qu'il ne choisisse pas le même côté que précédemment.
+            { // Alternance Droite-Gauche
+                nbChoixAleatoires++;
+                if (nbChoixAleatoires % 2 == 0)
+                    Droite();
+                else
+                    Gauche();
             }
         }
-        if (c == 2)  // Cas où on souhaite aller dans la colonne de droite
-        {
-            Tourner(90);
-            if (!MurDevant())
-            {
-                Avancer(1);
-                if (x = c) // Si on se trouve dans la colonne souhaitée
-                {
-                    Tourner(90);
-                    Devant();
-                }
-                else if (!MurDevant()) // Sinon, continuer à avancer
-                {
-                    Avancer(1);
-                    if (x = c)
-                    {
-                        Tourner(90);
-                        Devant();
-                    }
-                }
-            }
-            else if (memoire[x][y][2] == 0)
-            {
-                Tourner(-90);
-                Arriere();
-            }
+        else{
+            actif = false;
+            Serial.println("11");
         }
     }
 }
 
 void setup()
 {
+    Serial.begin(9600);
+    BoardInit();
+    
+    pinMode(48, INPUT);
+    pinMode(49, INPUT);
+    delay(100);
+
     // Initialisation
     x = 1;
     y = 0;
     c = 0;
     nbChoixAleatoires = 0;
     direction = 0;
+    actif = false;
     InitialiserMemoire(); // Remplir le contenu du tableau
 
     initialiserSon();
@@ -378,8 +420,10 @@ void setup()
 
 void loop()
 {
-    if(!actif && detecter5kHz){
+    if(!actif && detecter5kHz()){
         actif = true;
         Devant();
     }
+
+    else if (actif) Devant();
 }
