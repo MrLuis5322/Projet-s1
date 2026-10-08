@@ -15,8 +15,19 @@ Inclure les librairies de functions que vous voulez utiliser
 #include <Parcours.h>
 #include "Son.h"
 
+
+/*
+Variables globales et defines
+*/
 // L'exploration ne commence qu'apres le signal sonore de depart.
 bool robotDemarre = false;
+bool bumperGa; //0
+bool bumperDr; //1
+bool bumperAv; //2
+bool bumperArr; //3
+
+int etat = 0; // = 0=Arret 1=Avance 2=Droite 3=Gauche 4=Recule 
+int etatPast = 0;
 
 /*
 Fonctions d'initialisation (setup)
