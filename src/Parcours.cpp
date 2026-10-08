@@ -53,18 +53,17 @@ static void trouverCaseVoisine(int ligne, int colonne, int direction,
   }
 }
 
-// Retourne le bit qui indique si une direction a deja ete examinee.
+// Retourne info qui indique si une direction a deja ete examinee.
 static int bitDirectionExaminee(int direction) {
   return PARCOURS_TESTE_NORD << direction;
 }
 
-// Retourne le bit qui indique si un mur a ete detecte dans cette direction.
+// Retourne info qui indique si un mur a ete detecte dans cette direction.
 static int bitDirectionBloquee(int direction) {
   return PARCOURS_BLOQUE_NORD << direction;
 }
 
-// Enregistre un passage dans les deux cases voisines pour garder la carte
-// coherente, quel que soit le cote depuis lequel le passage a ete examine.
+// Enregistre un passage dans les deux cases voisines
 static void enregistrerPassage(int ligne, int colonne, int direction,
                                bool bloque) {
   int ligneVoisine;
