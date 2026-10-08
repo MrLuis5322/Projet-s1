@@ -18,7 +18,7 @@ enum EtatRobot {
 
 void arret();
 void tourne(float angleDegres);
-void mouvementAvant(float DistanceCM);
+bool mouvementAvant(float DistanceCM);
 void annulerMouvement();
 
 #endif

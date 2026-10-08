@@ -12,36 +12,11 @@ Inclure les librairies de functions que vous voulez utiliser
 #include <LibRobus.h>
 #include <Mouvement.h>
 #include <DetecteurProximite.h>
+#include <Parcours.h>
 #include "Son.h"
 
-/*
-Variables globales et defines
-*/
-int posX = 2; // 1,2,3
-int posY = 1; // 1 - 10 (Goal)
-bool goal = false; //
-
-
-bool bumperGa; //0
-bool bumperDr; //1
-bool bumperAv; //2
-bool bumperArr; //3
-
-int etat = 0; // = 0=Arret 1=Avance 2=Droite 3=Gauche 4=Recule 
-int etatPast = 0;
-bool robotDemarre = false; 
-
-/*
-void beep(int count){
-  for(int i=0;i<count;i++){
-    AX_BuzzerON();
-    delay(100);
-    AX_BuzzerOFF();
-    delay(100);  
-  }
-  delay(400);
-}
-*/
+// L'exploration ne commence qu'apres le signal sonore de depart.
+bool robotDemarre = false;
 
 /*
 Fonctions d'initialisation (setup)
@@ -53,22 +28,15 @@ void setup(){
   Serial.begin(115200);
   ENCODER_Reset(0);
   ENCODER_Reset(1);
-  pinMode(vertpin, INPUT);
-  pinMode(rougepin, INPUT);
   delay(1000);
   beep(1);
   initialiserSon();
+  initialiserParcours();
 }
 
-/*
-Fonctions de boucle infini
-*/
-
-
 void loop() {
-
-   // Attente signal 5 kHz
-  if (robotDemarre == false) {
+  // Attend le signal de depart et maintient le robot a l'arret entre-temps.
+  if (!robotDemarre) {
     arret();
     if (detecter5kHz()) {
       robotDemarre = true;
@@ -77,20 +45,15 @@ void loop() {
     return;
   }
 
-
-  while (goal != true) {
-    Serial.println("Goal: ");
-
-    while (ObstacleDetecte == false) {
-      Serial.println(ObstacleDetecte);
-        mouvementAvant(250);
-        delay(5000);
-      }
-    
+  // Une etape peut sonder plusieurs directions bloquees, mais ne deplace le
+  // robot que d'une case au maximum avant de rendre la main a loop().
+  if (!parcoursTermine()) {
+    parcourirUneEtape();
+    if (parcoursTermine()) {
+      arret();
+      beep(parcoursReussi() ? 3 : 5);
+    }
+  } else {
+    arret();
   }
 }
-
-  
-
-
-

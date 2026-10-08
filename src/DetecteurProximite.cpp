@@ -14,16 +14,15 @@ void initialiserDetecteurProximite() {
   pinMode(rougepin, INPUT);
 }
 
-// Met a jour Vert et Rouge et renvoie si besoin d'arret
+// Lit les deux sorties du detecteur avant. Une sortie LOW indique un obstacle.
 void detecterObstacle() {
-
   vert = digitalRead(vertpin);
   rouge = digitalRead(rougepin);
 
-  if (!(vert && rouge) or !vert or !rouge) {
-    ObstacleDetecte = true;
+  // Recalcule l'etat a chaque lecture afin qu'une ancienne detection ne reste
+  // pas active apres que le robot se soit eloigne de l'obstacle.
+  ObstacleDetecte = !(vert && rouge);
+  if (ObstacleDetecte) {
     Serial.println("Obstacle detecte");
-  }  
-  
-  
+  }
 }
