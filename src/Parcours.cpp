@@ -4,8 +4,8 @@
 
 // Le plan fait 5 m de haut repartis sur 10 cases de 50 cm.
 static const float DISTANCE_ENTRE_CASES_CM = 50.0f;
-static const uint8_t NOMBRE_DIRECTIONS = 4;
-static const uint8_t NOMBRE_CASES =
+static const int NOMBRE_DIRECTIONS = 4;
+static const int NOMBRE_CASES =
     PARCOURS_LIGNES * PARCOURS_COLONNES;
 
 enum Direction {
@@ -17,24 +17,23 @@ enum Direction {
 
 // La pile garde chaque case du chemin et les directions restant a examiner.
 // Une case est codee par son indice dans le tableau 10 x 3.
-static uint8_t pileIndicesCases[NOMBRE_CASES];
-static uint8_t pileDirectionsRetour[NOMBRE_CASES];
-static uint8_t pileProchainesDirections[NOMBRE_CASES];
-static int8_t sommetPile = -1;
+static int pileIndicesCases[NOMBRE_CASES];
+static int pileDirectionsRetour[NOMBRE_CASES];
+static int pileProchainesDirections[NOMBRE_CASES];
+static int sommetPile = -1;
 
-static uint8_t ligneActuelle = PARCOURS_LIGNES - 1;
-static uint8_t colonneActuelle = PARCOURS_COLONNES / 2;
-static uint8_t orientationActuelle = NORD;
+static int ligneActuelle = PARCOURS_LIGNES - 1;
+static int colonneActuelle = PARCOURS_COLONNES / 2;
+static int orientationActuelle = NORD;
 static bool parcoursInitialise = false;
 static bool parcoursEstTermine = false;
 static bool sortieAtteinte = false;
 
-uint16_t tableauParcours[PARCOURS_LIGNES][PARCOURS_COLONNES];
+int tableauParcours[PARCOURS_LIGNES][PARCOURS_COLONNES];
 
 // Calcule la case voisine dans la direction demandee.
-static void trouverCaseVoisine(uint8_t ligne, uint8_t colonne,
-                               uint8_t direction, int8_t *ligneVoisine,
-                               int8_t *colonneVoisine) {
+static void trouverCaseVoisine(int ligne, int colonne, int direction, 
+                              int *ligneVoisine, int *colonneVoisine) {
   *ligneVoisine = ligne;
   *colonneVoisine = colonne;
 
@@ -55,28 +54,28 @@ static void trouverCaseVoisine(uint8_t ligne, uint8_t colonne,
 }
 
 // Retourne le bit qui indique si une direction a deja ete examinee.
-static uint16_t bitDirectionExaminee(uint8_t direction) {
-  return (uint16_t)(PARCOURS_TESTE_NORD << direction);
+static int bitDirectionExaminee(int direction) {
+  return PARCOURS_TESTE_NORD << direction;
 }
 
 // Retourne le bit qui indique si un mur a ete detecte dans cette direction.
-static uint16_t bitDirectionBloquee(uint8_t direction) {
-  return (uint16_t)(PARCOURS_BLOQUE_NORD << direction);
+static int bitDirectionBloquee(int direction) {
+  return PARCOURS_BLOQUE_NORD << direction;
 }
 
 // Enregistre un passage dans les deux cases voisines pour garder la carte
 // coherente, quel que soit le cote depuis lequel le passage a ete examine.
-static void enregistrerPassage(uint8_t ligne, uint8_t colonne,
-                               uint8_t direction, bool bloque) {
-  int8_t ligneVoisine;
-  int8_t colonneVoisine;
+static void enregistrerPassage(int ligne, int colonne, int direction,
+                               bool bloque) {
+  int ligneVoisine;
+  int colonneVoisine;
   trouverCaseVoisine(ligne, colonne, direction,
                      &ligneVoisine, &colonneVoisine);
 
-  uint16_t bitExamine = bitDirectionExaminee(direction);
-  uint16_t bitBloque = bitDirectionBloquee(direction);
+  int bitExamine = bitDirectionExaminee(direction);
+  int bitBloque = bitDirectionBloquee(direction);
   tableauParcours[ligne][colonne] |= bitExamine;
-  tableauParcours[ligne][colonne] &= (uint16_t)~bitBloque;
+  tableauParcours[ligne][colonne] &= ~bitBloque;
 
   if (bloque) {
     tableauParcours[ligne][colonne] |= bitBloque;
@@ -88,13 +87,12 @@ static void enregistrerPassage(uint8_t ligne, uint8_t colonne,
     return;
   }
 
-  uint8_t directionOpposee =
-      (uint8_t)((direction + 2) % NOMBRE_DIRECTIONS);
-  uint16_t bitExamineOppose = bitDirectionExaminee(directionOpposee);
-  uint16_t bitBloqueOppose = bitDirectionBloquee(directionOpposee);
+  int directionOpposee = (direction + 2) % NOMBRE_DIRECTIONS;
+  int bitExamineOppose = bitDirectionExaminee(directionOpposee);
+  int bitBloqueOppose = bitDirectionBloquee(directionOpposee);
   tableauParcours[ligneVoisine][colonneVoisine] |= bitExamineOppose;
   tableauParcours[ligneVoisine][colonneVoisine] &=
-      (uint16_t)~bitBloqueOppose;
+      ~bitBloqueOppose;
 
   if (bloque) {
     tableauParcours[ligneVoisine][colonneVoisine] |= bitBloqueOppose;
@@ -102,10 +100,10 @@ static void enregistrerPassage(uint8_t ligne, uint8_t colonne,
 }
 
 // Tourne le robot vers une direction et met a jour son orientation connue.
-static void orienterVers(uint8_t direction) {
-  uint8_t quartDeTourDroite =
-      (uint8_t)((direction + NOMBRE_DIRECTIONS - orientationActuelle) %
-                NOMBRE_DIRECTIONS);
+static void orienterVers(int direction) {
+  int quartDeTourDroite =
+      (direction + NOMBRE_DIRECTIONS - orientationActuelle) %
+      NOMBRE_DIRECTIONS;
 
   if (quartDeTourDroite == 1) {
     tourne(90);
@@ -119,10 +117,9 @@ static void orienterVers(uint8_t direction) {
 }
 
 // Met a jour la case du robot sans effacer les informations deja memorisees.
-static void mettreAJourPosition(uint8_t nouvelleLigne,
-                                uint8_t nouvelleColonne) {
+static void mettreAJourPosition(int nouvelleLigne, int nouvelleColonne) {
   tableauParcours[ligneActuelle][colonneActuelle] &=
-      (uint16_t)~PARCOURS_COURANTE;
+      ~PARCOURS_COURANTE;
   ligneActuelle = nouvelleLigne;
   colonneActuelle = nouvelleColonne;
   tableauParcours[ligneActuelle][colonneActuelle] |=
@@ -146,11 +143,9 @@ static void terminerSansSortie() {
 }
 
 // Ajoute une case a la pile et memorise par ou le robot devra revenir.
-static void empilerCase(uint8_t ligne, uint8_t colonne,
-                        uint8_t directionRetour) {
+static void empilerCase(int ligne, int colonne, int directionRetour) {
   ++sommetPile;
-  pileIndicesCases[sommetPile] =
-      (uint8_t)(ligne * PARCOURS_COLONNES + colonne);
+  pileIndicesCases[sommetPile] = ligne * PARCOURS_COLONNES + colonne;
   pileDirectionsRetour[sommetPile] = directionRetour;
   pileProchainesDirections[sommetPile] = NORD;
 }
@@ -158,8 +153,8 @@ static void empilerCase(uint8_t ligne, uint8_t colonne,
 // Reinitialise la carte et place le robot au depart, au centre de la rangee du
 // bas, oriente vers le haut du parcours.
 void initialiserParcours() {
-  for (uint8_t ligne = 0; ligne < PARCOURS_LIGNES; ++ligne) {
-    for (uint8_t colonne = 0; colonne < PARCOURS_COLONNES; ++colonne) {
+  for (int ligne = 0; ligne < PARCOURS_LIGNES; ++ligne) {
+    for (int colonne = 0; colonne < PARCOURS_COLONNES; ++colonne) {
       tableauParcours[ligne][colonne] = 0;
     }
   }
@@ -195,22 +190,22 @@ void parcourirUneEtape() {
   }
 
   while (sommetPile >= 0) {
-    uint8_t ligneCase =
+    int ligneCase =
         pileIndicesCases[sommetPile] / PARCOURS_COLONNES;
-    uint8_t colonneCase =
+    int colonneCase =
         pileIndicesCases[sommetPile] % PARCOURS_COLONNES;
 
     // Cherche une direction non examinee dans la case courante de la pile.
     if (pileProchainesDirections[sommetPile] < NOMBRE_DIRECTIONS) {
-      uint8_t direction = pileProchainesDirections[sommetPile]++;
+      int direction = pileProchainesDirections[sommetPile]++;
 
       if ((tableauParcours[ligneCase][colonneCase] &
            bitDirectionExaminee(direction)) != 0) {
         continue;
       }
 
-      int8_t ligneVoisine;
-      int8_t colonneVoisine;
+      int ligneVoisine;
+      int colonneVoisine;
       trouverCaseVoisine(ligneCase, colonneCase, direction,
                          &ligneVoisine, &colonneVoisine);
 
@@ -236,9 +231,9 @@ void parcourirUneEtape() {
         continue;
       }
 
-      mettreAJourPosition((uint8_t)ligneVoisine, (uint8_t)colonneVoisine);
+      mettreAJourPosition(ligneVoisine, colonneVoisine);
       empilerCase(ligneActuelle, colonneActuelle,
-                  (uint8_t)((direction + 2) % NOMBRE_DIRECTIONS));
+                  (direction + 2) % NOMBRE_DIRECTIONS);
       verifierSortie();
       return;
     }
@@ -250,9 +245,9 @@ void parcourirUneEtape() {
     }
 
     // La branche est terminee : recule d'une case vers le parent du DFS.
-    uint8_t directionRetour = pileDirectionsRetour[sommetPile];
-    int8_t ligneParent;
-    int8_t colonneParent;
+    int directionRetour = pileDirectionsRetour[sommetPile];
+    int ligneParent;
+    int colonneParent;
     trouverCaseVoisine(ligneActuelle, colonneActuelle, directionRetour,
                        &ligneParent, &colonneParent);
     orienterVers(directionRetour);
@@ -264,7 +259,7 @@ void parcourirUneEtape() {
     }
 
     --sommetPile;
-    mettreAJourPosition((uint8_t)ligneParent, (uint8_t)colonneParent);
+    mettreAJourPosition(ligneParent, colonneParent);
     return;
   }
 

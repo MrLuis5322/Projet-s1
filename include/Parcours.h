@@ -1,8 +1,6 @@
 #ifndef PARCOURS_H
 #define PARCOURS_H
 
-#include <stdint.h>
-
 #define PARCOURS_LIGNES 10
 #define PARCOURS_COLONNES 3
 
@@ -20,7 +18,7 @@
 
 // Carte 10 x 3 : indique les cases visitees, la case courante et les passages
 // deja testes; un passage bloque possede aussi son indicateur de direction.
-extern uint16_t tableauParcours[PARCOURS_LIGNES][PARCOURS_COLONNES];
+extern int tableauParcours[PARCOURS_LIGNES][PARCOURS_COLONNES];
 
 // Initialise la carte et place virtuellement le robot au depart (case du bas,
 // colonne centrale), avec l'avant du robot oriente vers le haut du parcours.
