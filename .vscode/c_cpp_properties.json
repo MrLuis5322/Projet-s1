@@ -8,18 +8,6 @@
         {
             "name": "PlatformIO",
             "includePath": [
-<<<<<<< HEAD
-                "C:/Users/thoma/OneDrive/Bureau/uni/GitHub/code/prog.uni/Projet-s1/include",
-                "C:/Users/thoma/OneDrive/Bureau/uni/GitHub/code/prog.uni/Projet-s1/src",
-                "C:/Users/thoma/OneDrive/Bureau/uni/GitHub/code/prog.uni/Projet-s1/lib/LibRobUS-master/src",
-                "C:/Users/thoma/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
-                "C:/Users/thoma/.platformio/packages/framework-arduino-avr/libraries/SoftwareSerial/src",
-                "C:/Users/thoma/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
-                "C:/Users/thoma/.platformio/packages/framework-arduino-avr/cores/arduino",
-                "C:/Users/thoma/.platformio/packages/framework-arduino-avr/variants/mega",
-                "C:/Users/thoma/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
-                "C:/Users/thoma/.platformio/packages/framework-arduino-avr/libraries/HID/src",
-=======
                 "C:/Users/gelol/OneDrive - USherbrooke/Automne 2026 - S1/Projet/Programmation/Projet-s1/include",
                 "C:/Users/gelol/OneDrive - USherbrooke/Automne 2026 - S1/Projet/Programmation/Projet-s1/src",
                 "C:/Users/gelol/OneDrive - USherbrooke/Automne 2026 - S1/Projet/Programmation/Projet-s1/lib/LibRobUS-master/src",
@@ -44,24 +32,11 @@
                 "C:/Users/gelol/OneDrive - USherbrooke/Automne 2026 - S1/Projet/Programmation/Projet-s1/lib/VexQuadEncoder",
                 "C:/Users/gelol/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
                 "C:/Users/gelol/.platformio/packages/framework-arduino-avr/libraries/HID/src",
->>>>>>> 0c7f4a725af489fc00aaf6238bae471b52abfdb9
                 ""
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-<<<<<<< HEAD
-                    "C:/Users/thoma/OneDrive/Bureau/uni/GitHub/code/prog.uni/Projet-s1/include",
-                    "C:/Users/thoma/OneDrive/Bureau/uni/GitHub/code/prog.uni/Projet-s1/src",
-                    "C:/Users/thoma/OneDrive/Bureau/uni/GitHub/code/prog.uni/Projet-s1/lib/LibRobUS-master/src",
-                    "C:/Users/thoma/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
-                    "C:/Users/thoma/.platformio/packages/framework-arduino-avr/libraries/SoftwareSerial/src",
-                    "C:/Users/thoma/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
-                    "C:/Users/thoma/.platformio/packages/framework-arduino-avr/cores/arduino",
-                    "C:/Users/thoma/.platformio/packages/framework-arduino-avr/variants/mega",
-                    "C:/Users/thoma/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
-                    "C:/Users/thoma/.platformio/packages/framework-arduino-avr/libraries/HID/src",
-=======
                     "C:/Users/gelol/OneDrive - USherbrooke/Automne 2026 - S1/Projet/Programmation/Projet-s1/include",
                     "C:/Users/gelol/OneDrive - USherbrooke/Automne 2026 - S1/Projet/Programmation/Projet-s1/src",
                     "C:/Users/gelol/OneDrive - USherbrooke/Automne 2026 - S1/Projet/Programmation/Projet-s1/lib/LibRobUS-master/src",
@@ -86,7 +61,6 @@
                     "C:/Users/gelol/OneDrive - USherbrooke/Automne 2026 - S1/Projet/Programmation/Projet-s1/lib/VexQuadEncoder",
                     "C:/Users/gelol/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
                     "C:/Users/gelol/.platformio/packages/framework-arduino-avr/libraries/HID/src",
->>>>>>> 0c7f4a725af489fc00aaf6238bae471b52abfdb9
                     ""
                 ]
             },
@@ -101,11 +75,7 @@
             ],
             "cStandard": "gnu11",
             "cppStandard": "gnu++11",
-<<<<<<< HEAD
-            "compilerPath": "C:/Users/thoma/.platformio/packages/toolchain-atmelavr/bin/avr-gcc.exe",
-=======
             "compilerPath": "C:/Users/gelol/.platformio/packages/toolchain-atmelavr/bin/avr-gcc.exe",
->>>>>>> 0c7f4a725af489fc00aaf6238bae471b52abfdb9
             "compilerArgs": [
                 "-mmcu=atmega2560",
                 ""
