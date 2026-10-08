@@ -4,21 +4,14 @@
 #define PARCOURS_LIGNES 10
 #define PARCOURS_COLONNES 3
 
-// Indicateurs stockes dans chaque case de parcours.
-#define PARCOURS_VISITEE 0x0001
-#define PARCOURS_COURANTE 0x0002
-#define PARCOURS_TESTE_NORD 0x0004
-#define PARCOURS_TESTE_EST 0x0008
-#define PARCOURS_TESTE_SUD 0x0010
-#define PARCOURS_TESTE_OUEST 0x0020
-#define PARCOURS_BLOQUE_NORD 0x0040
-#define PARCOURS_BLOQUE_EST 0x0080
-#define PARCOURS_BLOQUE_SUD 0x0100
-#define PARCOURS_BLOQUE_OUEST 0x0200
-
-// Carte 10 x 3 : indique les cases visitees, la case courante et les passages
-// deja testes; un passage bloque possede aussi son indicateur de direction.
+// Chaque case contient 0 si elle n'a pas ete visitee et 1 si elle l'a ete.
+// Le robot est a la case dont la valeur est 2.
 extern int tableauParcours[PARCOURS_LIGNES][PARCOURS_COLONNES];
+
+// Chaque tableau contient des 0 et des 1 : l'un note les directions examinees,
+// l'autre les directions bloquees. Ordre : nord, est, sud, ouest.
+extern int directionsExaminees[PARCOURS_LIGNES][PARCOURS_COLONNES][4];
+extern int passagesBloques[PARCOURS_LIGNES][PARCOURS_COLONNES][4];
 
 // Initialise la carte et place virtuellement le robot au depart (case du bas,
 // colonne centrale), avec l'avant du robot oriente vers le haut du parcours.

@@ -30,6 +30,8 @@ static bool parcoursEstTermine = false;
 static bool sortieAtteinte = false;
 
 int tableauParcours[PARCOURS_LIGNES][PARCOURS_COLONNES];
+int directionsExaminees[PARCOURS_LIGNES][PARCOURS_COLONNES][4];
+int passagesBloques[PARCOURS_LIGNES][PARCOURS_COLONNES][4];
 
 // Calcule la case voisine dans la direction demandee.
 static void trouverCaseVoisine(int ligne, int colonne, int direction, 
@@ -53,17 +55,7 @@ static void trouverCaseVoisine(int ligne, int colonne, int direction,
   }
 }
 
-// Retourne info qui indique si une direction a deja ete examinee.
-static int bitDirectionExaminee(int direction) {
-  return PARCOURS_TESTE_NORD << direction;
-}
-
-// Retourne info qui indique si un mur a ete detecte dans cette direction.
-static int bitDirectionBloquee(int direction) {
-  return PARCOURS_BLOQUE_NORD << direction;
-}
-
-// Enregistre un passage dans les deux cases voisines
+// Enregistre directement 1 ou 0 pour ce passage dans les deux cases.
 static void enregistrerPassage(int ligne, int colonne, int direction,
                                bool bloque) {
   int ligneVoisine;
@@ -71,14 +63,8 @@ static void enregistrerPassage(int ligne, int colonne, int direction,
   trouverCaseVoisine(ligne, colonne, direction,
                      &ligneVoisine, &colonneVoisine);
 
-  int bitExamine = bitDirectionExaminee(direction);
-  int bitBloque = bitDirectionBloquee(direction);
-  tableauParcours[ligne][colonne] |= bitExamine;
-  tableauParcours[ligne][colonne] &= ~bitBloque;
-
-  if (bloque) {
-    tableauParcours[ligne][colonne] |= bitBloque;
-  }
+  directionsExaminees[ligne][colonne][direction] = 1;
+  passagesBloques[ligne][colonne][direction] = bloque ? 1 : 0;
 
   // Une limite du tableau est connue, mais ne signifie pas qu'un mur a ete vu.
   if (ligneVoisine < 0 || ligneVoisine >= PARCOURS_LIGNES ||
@@ -87,15 +73,9 @@ static void enregistrerPassage(int ligne, int colonne, int direction,
   }
 
   int directionOpposee = (direction + 2) % NOMBRE_DIRECTIONS;
-  int bitExamineOppose = bitDirectionExaminee(directionOpposee);
-  int bitBloqueOppose = bitDirectionBloquee(directionOpposee);
-  tableauParcours[ligneVoisine][colonneVoisine] |= bitExamineOppose;
-  tableauParcours[ligneVoisine][colonneVoisine] &=
-      ~bitBloqueOppose;
-
-  if (bloque) {
-    tableauParcours[ligneVoisine][colonneVoisine] |= bitBloqueOppose;
-  }
+  directionsExaminees[ligneVoisine][colonneVoisine][directionOpposee] = 1;
+  passagesBloques[ligneVoisine][colonneVoisine][directionOpposee] =
+      bloque ? 1 : 0;
 }
 
 // Tourne le robot vers une direction et met a jour son orientation connue.
@@ -115,14 +95,12 @@ static void orienterVers(int direction) {
   orientationActuelle = direction;
 }
 
-// Met a jour la case du robot sans effacer les informations deja memorisees.
+// Met a jour la position : 1 signifie visitee et 2 signifie position courante.
 static void mettreAJourPosition(int nouvelleLigne, int nouvelleColonne) {
-  tableauParcours[ligneActuelle][colonneActuelle] &=
-      ~PARCOURS_COURANTE;
+  tableauParcours[ligneActuelle][colonneActuelle] = 1;
   ligneActuelle = nouvelleLigne;
   colonneActuelle = nouvelleColonne;
-  tableauParcours[ligneActuelle][colonneActuelle] |=
-      PARCOURS_VISITEE | PARCOURS_COURANTE;
+  tableauParcours[ligneActuelle][colonneActuelle] = 2;
 }
 
 // Termine la recherche des que le robot entre dans la rangee du haut.
@@ -155,6 +133,10 @@ void initialiserParcours() {
   for (int ligne = 0; ligne < PARCOURS_LIGNES; ++ligne) {
     for (int colonne = 0; colonne < PARCOURS_COLONNES; ++colonne) {
       tableauParcours[ligne][colonne] = 0;
+      for (int direction = 0; direction < NOMBRE_DIRECTIONS; ++direction) {
+        directionsExaminees[ligne][colonne][direction] = 0;
+        passagesBloques[ligne][colonne][direction] = 0;
+      }
     }
   }
 
@@ -166,8 +148,7 @@ void initialiserParcours() {
   sortieAtteinte = false;
   parcoursInitialise = true;
 
-  tableauParcours[ligneActuelle][colonneActuelle] =
-      PARCOURS_VISITEE | PARCOURS_COURANTE;
+  tableauParcours[ligneActuelle][colonneActuelle] = 2;
   empilerCase(ligneActuelle, colonneActuelle, SUD);
 }
 
@@ -198,8 +179,7 @@ void parcourirUneEtape() {
     if (pileProchainesDirections[sommetPile] < NOMBRE_DIRECTIONS) {
       int direction = pileProchainesDirections[sommetPile]++;
 
-      if ((tableauParcours[ligneCase][colonneCase] &
-           bitDirectionExaminee(direction)) != 0) {
+      if (directionsExaminees[ligneCase][colonneCase][direction] == 1) {
         continue;
       }
 
@@ -217,8 +197,7 @@ void parcourirUneEtape() {
 
       // Le DFS n'a besoin que de visiter chaque case une fois pour trouver
       // une sortie; il ignore donc les liens vers les cases deja visitees.
-      if ((tableauParcours[ligneVoisine][colonneVoisine] &
-           PARCOURS_VISITEE) != 0) {
+      if (tableauParcours[ligneVoisine][colonneVoisine] != 0) {
         continue;
       }
 
