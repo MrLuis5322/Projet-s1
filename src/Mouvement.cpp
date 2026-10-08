@@ -29,13 +29,20 @@ float facteur_vitesse_tourne = 1;
 float vitesse_Gauche_Tourne = 0.40*facteur_vitesse_tourne;
 float vitesse_Droite_Tourne = 0.408*facteur_vitesse_tourne;
 
-
-// Arrete les deux moteurs en envoyant une vitesse nulle.
+// -----------------------------------------------------------------------------
+// Cette fonction arrête immédiatement les deux moteurs pour finir un déplacement
+// ou interrompre un mouvement de sécurité.
+// -----------------------------------------------------------------------------
 void arret(){
   MOTOR_SetSpeed(RIGHT, 0);
   MOTOR_SetSpeed(LEFT, 0);
 }
 
+// -----------------------------------------------------------------------------
+// Convertit une distance en centimètres en ticks d'encodeur.
+// Le paramètre encodeur permet de choisir entre le gauche et le droit, car les
+// roues n'ont pas exactement le même nombre de ticks par tour.
+// -----------------------------------------------------------------------------
 long distanceEnTicks(float distanceCM, int encodeur) {
   if (encodeur == 0) {
     return lround(distanceCM / CM_PAR_TICK_G);
@@ -44,6 +51,11 @@ long distanceEnTicks(float distanceCM, int encodeur) {
 }
 
 
+// -----------------------------------------------------------------------------
+// Avance le robot d'une distance donnée en centimètres.
+// La boucle suit la cible d'encodeur avec deux phases de ralentissement pour
+// arriver au point final plus proprement et réduire les écarts de position.
+// -----------------------------------------------------------------------------
 void mouvementAvant(float distanceCM) {
   long CibleG = distanceEnTicks(distanceCM, 0);
   long CibleD = distanceEnTicks(distanceCM, 1);
@@ -58,14 +70,19 @@ void mouvementAvant(float distanceCM) {
   bool ralentissement1 = false;
   bool ralentissement2 = false;
 
+  // On avance tant que les deux roues n'ont pas atteint leur cible respective.
   while (ENCODER_Read(0) < CibleG && ENCODER_Read(1) < CibleD) {
     
     long encodeurG = ENCODER_Read(0);
     long encodeurD = ENCODER_Read(1);
+
+    // Diagnostic utile pendant le développement pour vérifier la progression.
     Serial.print("Encodeur G: ");
     Serial.println(encodeurG);
     Serial.print("Encodeur D: ");
     Serial.println(encodeurD);
+
+    // Si un obstacle est détecté, on annule le déplacement pour sécuriser le robot.
     detecterObstacle();
     if (ObstacleDetecte == true) {
       annulerMouvement();
@@ -73,6 +90,7 @@ void mouvementAvant(float distanceCM) {
       break;
         }
     
+    // Première réduction de vitesse lorsqu'on est à environ 700 ticks de la fin.
     if (!ralentissement1 &&
         encodeurG >= CibleG -700 &&
         encodeurD >= CibleD -700) {
@@ -80,6 +98,8 @@ void mouvementAvant(float distanceCM) {
       MOTOR_SetSpeed(RIGHT, vitesse_Droite*0.7);
       ralentissement1 = true;
     }
+
+    // Deuxième ralentissement plus fort, proche de l'objectif final.
     if (!ralentissement2 &&
         encodeurG >= CibleG -400 &&
         encodeurD >= CibleD -400) {
@@ -96,6 +116,11 @@ void mouvementAvant(float distanceCM) {
 
 
 
+// -----------------------------------------------------------------------------
+// Fait pivoter le robot d'un angle donné en degrés.
+// On convertit l'angle en distance approximative de roue, puis on applique des
+// vitesses opposées sur les moteurs pour tourner autour du centre du robot.
+// -----------------------------------------------------------------------------
 void tourne(float angleDegres) { 
   float distanceRoue = (abs(angleDegres) * CIRCONFERENCE_TOURNER) / 360; // distance parcourue par chaque roue pour tourner de angleDegres
 
@@ -108,16 +133,18 @@ void tourne(float angleDegres) {
 
 
 
-  // Tourne gauche ou droite
-  if (angleDegres > 0) {     // Droite
+  // Sens de rotation : angle positif = droite, négatif = gauche.
+  if (angleDegres > 0) { // Rotation vers la droite
     MOTOR_SetSpeed(LEFT, vitesse_Gauche_Tourne);
     MOTOR_SetSpeed(RIGHT, -vitesse_Droite_Tourne);
-  } else {                   // Gauche
+  } else { // Rotation vers la gauche
     MOTOR_SetSpeed(LEFT, -vitesse_Gauche_Tourne);
     MOTOR_SetSpeed(RIGHT, vitesse_Droite_Tourne);
   }
 
-while (abs(ENCODER_Read(0)) < CibleG && abs(ENCODER_Read(1)) < CibleD) {
+  // La rotation continue tant que les deux roues n'ont pas parcouru la distance
+  // calculée pour atteindre l'angle demandé.
+  while (abs(ENCODER_Read(0)) < CibleG && abs(ENCODER_Read(1)) < CibleD) {
     delay(1);
   }
 
@@ -126,26 +153,36 @@ while (abs(ENCODER_Read(0)) < CibleG && abs(ENCODER_Read(1)) < CibleD) {
 }
 
 
+// -----------------------------------------------------------------------------
+// Annule un mouvement en cours après la détection d'un obstacle.
+// Le robot s'arrête, recule brièvement, puis augmente progressivement sa vitesse
+// de recul pour sortir proprement de la zone bloquée.
+// -----------------------------------------------------------------------------
 void annulerMouvement() {
 
   arret();
   delay(300);
+
+  // On mémorise la position avant le recul pour contrôler la distance de sortie.
   int EncodeurInitialG = ENCODER_Read(0);
   int EncodeurInitialD = ENCODER_Read(1);
   long CibleG = 700;
   long CibleD = 700;
-  
+
+  // Recul initial plus doux pour ne pas donner un coup de frein brutal.
   MOTOR_SetSpeed(LEFT, -vitesse_Gauche*0.35);
   MOTOR_SetSpeed(RIGHT, -vitesse_Droite*0.3);
 
   bool fast = false;
   bool topspeed = false;
 
+  // Le recul se poursuit jusqu'à ce que les deux roues aient parcouru suffisamment.
   while (ENCODER_Read(0) > CibleG && ENCODER_Read(1) > CibleD) {
     
     long encodeurG = ENCODER_Read(0);
     long encodeurD = ENCODER_Read(1);
 
+     // On passe à un recul plus rapide après 250 ticks de séparation.
      if (!fast &&
         encodeurG <= EncodeurInitialG - 250 &&
         encodeurD <= EncodeurInitialD - 250) {
@@ -153,6 +190,8 @@ void annulerMouvement() {
       MOTOR_SetSpeed(RIGHT, -vitesse_Droite*0.6);
       fast = true;
     }
+
+    // La dernière étape de recul augmente encore la puissance pour sortir plus vite.
     if (!topspeed &&
         encodeurG <= EncodeurInitialG - 500 &&
         encodeurD <= EncodeurInitialD - 500) {
@@ -165,6 +204,5 @@ void annulerMouvement() {
   }
   arret();
   ObstacleDetecte = false;
-
 
 }
