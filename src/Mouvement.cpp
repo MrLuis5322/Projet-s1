@@ -1,4 +1,4 @@
-//**************************************
+ //**************************************
 // Projet: Labyrinthe-S1
 // Fichiers: Mouvement.cpp
 // Equipe: 13-A
@@ -45,6 +45,8 @@ float erreurPrecedenteRight = 0;
 void arret(){
   vitesseLeft = 0;
   vitesseRight = 0;
+  countEncLeft = 0;
+  countEncRight = 0;
   MOTOR_SetSpeed(RIGHT, 0);
   MOTOR_SetSpeed(LEFT, 0);
 }
