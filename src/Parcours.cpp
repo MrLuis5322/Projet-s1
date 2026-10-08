@@ -2,40 +2,39 @@
 #include <Mouvement.h>
 #include "Parcours.h"
 
-// Chaque case mesure 50 cm dans le plan du parcours.
-static const float LONGUEUR_CASE_CM = 50.0f;
+// Le plan fait 5 m de haut repartis sur 10 cases de 50 cm.
+static const float DISTANCE_ENTRE_CASES_CM = 50.0f;
 static const uint8_t NOMBRE_DIRECTIONS = 4;
-static const uint8_t CAPACITE_PILE =
+static const uint8_t NOMBRE_CASES =
     PARCOURS_LIGNES * PARCOURS_COLONNES;
 
 enum Direction {
   NORD = 0,
-  EST = 1,
-  SUD = 2,
-  OUEST = 3
+  EST,
+  SUD,
+  OUEST
 };
 
-// Ces tableaux forment une pile DFS sans objets : ils memorisent les cases
-// a revisiter, la direction de retour et les directions restant a explorer.
-static uint8_t pileLigne[CAPACITE_PILE];
-static uint8_t pileColonne[CAPACITE_PILE];
-static uint8_t pileDirectionRetour[CAPACITE_PILE];
-static uint8_t pileProchaineDirection[CAPACITE_PILE];
-static int sommetPile = -1;
+// La pile garde chaque case du chemin et les directions restant a examiner.
+// Une case est codee par son indice dans le tableau 10 x 3.
+static uint8_t pileIndicesCases[NOMBRE_CASES];
+static uint8_t pileDirectionsRetour[NOMBRE_CASES];
+static uint8_t pileProchainesDirections[NOMBRE_CASES];
+static int8_t sommetPile = -1;
 
-// Position et orientation courantes du robot dans le repere de la grille.
-static uint8_t ligneRobot = PARCOURS_LIGNES - 1;
-static uint8_t colonneRobot = PARCOURS_COLONNES / 2;
-static uint8_t orientationRobot = NORD;
-static bool estInitialise = false;
-static bool estTermine = false;
-static bool estReussi = false;
+static uint8_t ligneActuelle = PARCOURS_LIGNES - 1;
+static uint8_t colonneActuelle = PARCOURS_COLONNES / 2;
+static uint8_t orientationActuelle = NORD;
+static bool parcoursInitialise = false;
+static bool parcoursEstTermine = false;
+static bool sortieAtteinte = false;
 
 uint16_t tableauParcours[PARCOURS_LIGNES][PARCOURS_COLONNES];
 
-// Associe une direction a sa variation de ligne et de colonne.
-static void obtenirVoisin(uint8_t ligne, uint8_t colonne, uint8_t direction,
-                          int8_t *ligneVoisine, int8_t *colonneVoisine) {
+// Calcule la case voisine dans la direction demandee.
+static void trouverCaseVoisine(uint8_t ligne, uint8_t colonne,
+                               uint8_t direction, int8_t *ligneVoisine,
+                               int8_t *colonneVoisine) {
   *ligneVoisine = ligne;
   *colonneVoisine = colonne;
 
@@ -55,107 +54,109 @@ static void obtenirVoisin(uint8_t ligne, uint8_t colonne, uint8_t direction,
   }
 }
 
-// Retourne les indicateurs de direction correspondants dans la carte 10 x 3.
-static uint16_t indicateurTeste(uint8_t direction) {
+// Retourne le bit qui indique si une direction a deja ete examinee.
+static uint16_t bitDirectionExaminee(uint8_t direction) {
   return (uint16_t)(PARCOURS_TESTE_NORD << direction);
 }
 
-static uint16_t indicateurBloque(uint8_t direction) {
+// Retourne le bit qui indique si un mur a ete detecte dans cette direction.
+static uint16_t bitDirectionBloquee(uint8_t direction) {
   return (uint16_t)(PARCOURS_BLOQUE_NORD << direction);
 }
 
-// Memorise l'etat d'un passage des deux cotes de la frontiere entre les cases.
-// Un passage ouvert est teste sans recevoir le bit BLOQUE.
+// Enregistre un passage dans les deux cases voisines pour garder la carte
+// coherente, quel que soit le cote depuis lequel le passage a ete examine.
 static void enregistrerPassage(uint8_t ligne, uint8_t colonne,
                                uint8_t direction, bool bloque) {
   int8_t ligneVoisine;
   int8_t colonneVoisine;
-  obtenirVoisin(ligne, colonne, direction, &ligneVoisine, &colonneVoisine);
+  trouverCaseVoisine(ligne, colonne, direction,
+                     &ligneVoisine, &colonneVoisine);
 
-  uint16_t teste = indicateurTeste(direction);
-  uint16_t bloqueBit = indicateurBloque(direction);
-  tableauParcours[ligne][colonne] |= teste;
-  tableauParcours[ligne][colonne] &= (uint16_t)~bloqueBit;
+  uint16_t bitExamine = bitDirectionExaminee(direction);
+  uint16_t bitBloque = bitDirectionBloquee(direction);
+  tableauParcours[ligne][colonne] |= bitExamine;
+  tableauParcours[ligne][colonne] &= (uint16_t)~bitBloque;
+
   if (bloque) {
-    tableauParcours[ligne][colonne] |= bloqueBit;
+    tableauParcours[ligne][colonne] |= bitBloque;
   }
 
+  // Une limite du tableau est connue, mais ne signifie pas qu'un mur a ete vu.
   if (ligneVoisine < 0 || ligneVoisine >= PARCOURS_LIGNES ||
       colonneVoisine < 0 || colonneVoisine >= PARCOURS_COLONNES) {
     return;
   }
 
-  uint8_t directionOpposee = (uint8_t)((direction + 2) % NOMBRE_DIRECTIONS);
-  uint16_t testeOppose = indicateurTeste(directionOpposee);
-  uint16_t bloqueOppose = indicateurBloque(directionOpposee);
-  tableauParcours[ligneVoisine][colonneVoisine] |= testeOppose;
+  uint8_t directionOpposee =
+      (uint8_t)((direction + 2) % NOMBRE_DIRECTIONS);
+  uint16_t bitExamineOppose = bitDirectionExaminee(directionOpposee);
+  uint16_t bitBloqueOppose = bitDirectionBloquee(directionOpposee);
+  tableauParcours[ligneVoisine][colonneVoisine] |= bitExamineOppose;
   tableauParcours[ligneVoisine][colonneVoisine] &=
-      (uint16_t)~bloqueOppose;
+      (uint16_t)~bitBloqueOppose;
+
   if (bloque) {
-    tableauParcours[ligneVoisine][colonneVoisine] |= bloqueOppose;
+    tableauParcours[ligneVoisine][colonneVoisine] |= bitBloqueOppose;
   }
 }
 
-// Oriente le robot vers un point cardinal et garde la carte d'orientation
-// coherente avec les rotations executees par les encodeurs.
+// Tourne le robot vers une direction et met a jour son orientation connue.
 static void orienterVers(uint8_t direction) {
-  uint8_t rotationDroite =
-      (uint8_t)((direction + NOMBRE_DIRECTIONS - orientationRobot) %
+  uint8_t quartDeTourDroite =
+      (uint8_t)((direction + NOMBRE_DIRECTIONS - orientationActuelle) %
                 NOMBRE_DIRECTIONS);
 
-  if (rotationDroite == 1) {
+  if (quartDeTourDroite == 1) {
     tourne(90);
-  } else if (rotationDroite == 2) {
+  } else if (quartDeTourDroite == 2) {
     tourne(180);
-  } else if (rotationDroite == 3) {
+  } else if (quartDeTourDroite == 3) {
     tourne(-90);
   }
 
-  orientationRobot = direction;
+  orientationActuelle = direction;
 }
 
-// Met a jour l'indicateur de case courante sans effacer l'historique des cases
-// deja visitees.
-static void definirPosition(uint8_t nouvelleLigne, uint8_t nouvelleColonne) {
-  tableauParcours[ligneRobot][colonneRobot] &= (uint16_t)~PARCOURS_COURANTE;
-  ligneRobot = nouvelleLigne;
-  colonneRobot = nouvelleColonne;
-  tableauParcours[ligneRobot][colonneRobot] |=
+// Met a jour la case du robot sans effacer les informations deja memorisees.
+static void mettreAJourPosition(uint8_t nouvelleLigne,
+                                uint8_t nouvelleColonne) {
+  tableauParcours[ligneActuelle][colonneActuelle] &=
+      (uint16_t)~PARCOURS_COURANTE;
+  ligneActuelle = nouvelleLigne;
+  colonneActuelle = nouvelleColonne;
+  tableauParcours[ligneActuelle][colonneActuelle] |=
       PARCOURS_VISITEE | PARCOURS_COURANTE;
 }
 
-// Arrete la recherche quand une case de la rangee superieure est atteinte.
-static void verifierArrivee() {
-  if (ligneRobot == 0) {
+// Termine la recherche des que le robot entre dans la rangee du haut.
+static void verifierSortie() {
+  if (ligneActuelle == 0) {
     arret();
-    estTermine = true;
-    estReussi = true;
+    parcoursEstTermine = true;
+    sortieAtteinte = true;
   }
 }
 
-// Marque la recherche comme impossible et immobilise le robot.
-static void signalerEchec() {
+// Immobilise le robot si la pile est vide sans que la sortie ait ete trouvee.
+static void terminerSansSortie() {
   arret();
-  estTermine = true;
-  estReussi = false;
+  parcoursEstTermine = true;
+  sortieAtteinte = false;
 }
 
-// Cree la premiere entree de la pile de recherche a la position de depart.
+// Ajoute une case a la pile et memorise par ou le robot devra revenir.
 static void empilerCase(uint8_t ligne, uint8_t colonne,
                         uint8_t directionRetour) {
-  if (sommetPile + 1 >= CAPACITE_PILE) {
-    signalerEchec();
-    return;
-  }
-
   ++sommetPile;
-  pileLigne[sommetPile] = ligne;
-  pileColonne[sommetPile] = colonne;
-  pileDirectionRetour[sommetPile] = directionRetour;
-  pileProchaineDirection[sommetPile] = NORD;
+  pileIndicesCases[sommetPile] =
+      (uint8_t)(ligne * PARCOURS_COLONNES + colonne);
+  pileDirectionsRetour[sommetPile] = directionRetour;
+  pileProchainesDirections[sommetPile] = NORD;
 }
 
-// Efface la carte et prepare la recherche depuis le depart central du bas.
+// Reinitialise la carte et place le robot au depart, au centre de la rangee du
+// bas, oriente vers le haut du parcours.
 void initialiserParcours() {
   for (uint8_t ligne = 0; ligne < PARCOURS_LIGNES; ++ligne) {
     for (uint8_t colonne = 0; colonne < PARCOURS_COLONNES; ++colonne) {
@@ -163,124 +164,119 @@ void initialiserParcours() {
     }
   }
 
-  ligneRobot = PARCOURS_LIGNES - 1;
-  colonneRobot = PARCOURS_COLONNES / 2;
-  orientationRobot = NORD;
+  ligneActuelle = PARCOURS_LIGNES - 1;
+  colonneActuelle = PARCOURS_COLONNES / 2;
+  orientationActuelle = NORD;
   sommetPile = -1;
-  estTermine = false;
-  estReussi = false;
-  estInitialise = true;
+  parcoursEstTermine = false;
+  sortieAtteinte = false;
+  parcoursInitialise = true;
 
-  tableauParcours[ligneRobot][colonneRobot] =
+  tableauParcours[ligneActuelle][colonneActuelle] =
       PARCOURS_VISITEE | PARCOURS_COURANTE;
-  empilerCase(ligneRobot, colonneRobot, SUD);
+  empilerCase(ligneActuelle, colonneActuelle, SUD);
 }
 
-// Teste les passages inconnus avec le capteur avant. Si un passage est libre,
-// le robot avance d'une case et cette nouvelle case devient le sommet du DFS.
-// Quand une case n'a plus de direction a explorer, le robot revient a son
-// parent par un passage deja emprunte.
+// Explore une nouvelle branche ou revient d'une case deja exploree. Chaque
+// appel fait au maximum un deplacement complet entre deux cases.
 void parcourirUneEtape() {
-  if (!estInitialise) {
+  if (!parcoursInitialise) {
     initialiserParcours();
   }
-  if (estTermine) {
+
+  if (parcoursEstTermine) {
     arret();
     return;
   }
 
-  verifierArrivee();
-  if (estTermine) {
+  verifierSortie();
+  if (parcoursEstTermine) {
     return;
   }
 
   while (sommetPile >= 0) {
-    uint8_t ligne = pileLigne[sommetPile];
-    uint8_t colonne = pileColonne[sommetPile];
+    uint8_t ligneCase =
+        pileIndicesCases[sommetPile] / PARCOURS_COLONNES;
+    uint8_t colonneCase =
+        pileIndicesCases[sommetPile] % PARCOURS_COLONNES;
 
-    if (pileProchaineDirection[sommetPile] < NOMBRE_DIRECTIONS) {
-      uint8_t direction = pileProchaineDirection[sommetPile]++;
-      uint16_t teste = indicateurTeste(direction);
-      if ((tableauParcours[ligne][colonne] & teste) != 0) {
+    // Cherche une direction non examinee dans la case courante de la pile.
+    if (pileProchainesDirections[sommetPile] < NOMBRE_DIRECTIONS) {
+      uint8_t direction = pileProchainesDirections[sommetPile]++;
+
+      if ((tableauParcours[ligneCase][colonneCase] &
+           bitDirectionExaminee(direction)) != 0) {
         continue;
       }
 
       int8_t ligneVoisine;
       int8_t colonneVoisine;
-      obtenirVoisin(ligne, colonne, direction,
-                    &ligneVoisine, &colonneVoisine);
+      trouverCaseVoisine(ligneCase, colonneCase, direction,
+                         &ligneVoisine, &colonneVoisine);
 
-      // Les limites de la grille sont des frontieres connues, pas des murs a
-      // sonder physiquement avec le robot.
+      // Les bords de la grille ne sont pas des passages a sonder.
       if (ligneVoisine < 0 || ligneVoisine >= PARCOURS_LIGNES ||
           colonneVoisine < 0 || colonneVoisine >= PARCOURS_COLONNES) {
-        enregistrerPassage(ligne, colonne, direction, true);
+        enregistrerPassage(ligneCase, colonneCase, direction, false);
         continue;
       }
 
-      // Un chemin vers une case deja exploree n'ajoute rien au DFS; le passage
-      // inverse du chemin de recherche est deja enregistre comme ouvert.
+      // Le DFS n'a besoin que de visiter chaque case une fois pour trouver
+      // une sortie; il ignore donc les liens vers les cases deja visitees.
       if ((tableauParcours[ligneVoisine][colonneVoisine] &
            PARCOURS_VISITEE) != 0) {
         continue;
       }
 
       orienterVers(direction);
-      bool passageOuvert = mouvementAvant(LONGUEUR_CASE_CM);
-      enregistrerPassage(ligne, colonne, direction, !passageOuvert);
+      bool passageOuvert = mouvementAvant(DISTANCE_ENTRE_CASES_CM);
+      enregistrerPassage(ligneCase, colonneCase, direction, !passageOuvert);
 
       if (!passageOuvert) {
-        // mouvementAvant recule jusqu'au point de depart de la sonde.
         continue;
       }
 
-      definirPosition((uint8_t)ligneVoisine, (uint8_t)colonneVoisine);
-      empilerCase(ligneRobot, colonneRobot,
+      mettreAJourPosition((uint8_t)ligneVoisine, (uint8_t)colonneVoisine);
+      empilerCase(ligneActuelle, colonneActuelle,
                   (uint8_t)((direction + 2) % NOMBRE_DIRECTIONS));
-      verifierArrivee();
+      verifierSortie();
       return;
     }
 
-    // Une branche est epuisee. Remonter vers sa case parente par le passage
-    // inverse du deplacement qui a mene a cette branche.
+    // Si la case de depart est epuisee, aucune sortie n'a ete trouvee.
     if (sommetPile == 0) {
-      signalerEchec();
+      terminerSansSortie();
       return;
     }
 
-    uint8_t directionRetour = pileDirectionRetour[sommetPile];
-    uint8_t ancienneLigne = ligneRobot;
-    uint8_t ancienneColonne = colonneRobot;
-    int8_t ligneParente;
-    int8_t colonneParente;
-    obtenirVoisin(ligneRobot, colonneRobot, directionRetour,
-                  &ligneParente, &colonneParente);
+    // La branche est terminee : recule d'une case vers le parent du DFS.
+    uint8_t directionRetour = pileDirectionsRetour[sommetPile];
+    int8_t ligneParent;
+    int8_t colonneParent;
+    trouverCaseVoisine(ligneActuelle, colonneActuelle, directionRetour,
+                       &ligneParent, &colonneParent);
     orienterVers(directionRetour);
 
-    if (!mouvementAvant(LONGUEUR_CASE_CM)) {
-      // Un obstacle apparu sur un passage deja emprunte rend le retour
-      // impossible avec le plan courant; on s'arrete plutot que de deviner.
-      enregistrerPassage(ancienneLigne, ancienneColonne,
-                         directionRetour, true);
-      signalerEchec();
+    if (!mouvementAvant(DISTANCE_ENTRE_CASES_CM)) {
+      // Le passage de retour n'est plus libre; la position reelle est incertaine.
+      terminerSansSortie();
       return;
     }
 
     --sommetPile;
-    definirPosition((uint8_t)ligneParente, (uint8_t)colonneParente);
+    mettreAJourPosition((uint8_t)ligneParent, (uint8_t)colonneParent);
     return;
   }
 
-  signalerEchec();
+  terminerSansSortie();
 }
 
-// Retourne l'etat de fin de l'exploration pour que main.cpp puisse choisir
-// d'attendre, de s'arreter ou de signaler la fin.
+// Indique si l'exploration a atteint la sortie ou epuise ses branches.
 bool parcoursTermine() {
-  return estTermine;
+  return parcoursEstTermine;
 }
 
-// Retourne vrai uniquement si le robot a atteint la rangee du haut.
+// Indique si le robot a atteint une case de la rangee du haut.
 bool parcoursReussi() {
-  return estReussi;
+  return sortieAtteinte;
 }
