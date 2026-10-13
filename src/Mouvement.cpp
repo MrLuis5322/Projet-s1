@@ -18,7 +18,7 @@ const int rougePin = 49;
 
 const float diametreRoue = 0.0762; // en mètre
 const float pi = 3.14159;
-const float DiametreRobot = 0.205; // en mètre
+const float DiametreRobot = 0.20; // en mètre
 const float CirconferenceRoue = pi * diametreRoue; // en mètre
 
 //********VARIABLES********//
@@ -28,12 +28,13 @@ int32_t countEncLeft = 0;
 int32_t countEncRight = 0;
 int32_t encLeft = 0;
 int32_t encRight = 0;
+int sequence = 0;
 
 // variables PID
 float Kp = 0.0;
 float Ki = 0.0;
 float Kd = 0.0;
-float pulseCibleLeft = 60;
+float pulseCibleLeft = 60.53;
 float pulseCibleRight = 60;
 float integrale = 0;
 float derivee = 0;
@@ -43,10 +44,13 @@ float erreurPrecedenteRight = 0;
 
 //********FONCTIONS********//
 void arret(){
+  sequence = FINI;
   vitesseLeft = 0;
   vitesseRight = 0;
   countEncLeft = 0;
   countEncRight = 0;
+  erreurPrecedenteLeft = 0;
+  erreurPrecedenteRight = 0;
   MOTOR_SetSpeed(RIGHT, 0);
   MOTOR_SetSpeed(LEFT, 0);
 }
@@ -92,12 +96,41 @@ void arretPID(float distance){
   }
 }
 
+void avance(float distance){
+  float distancePulse = distance / CirconferenceRoue * 3200;
+  float pulseArret = distancePulse * 0.8;
+  pulseCibleLeft = PULSE_CIBLE_LEFT;
+  pulseCibleRight = PULSE_CIBLE_RIGHT;
+  sequence = ENCOURS;
+
+  while(sequence == ENCOURS)
+  {
+    encLeft = ENCODER_Read(LEFT);
+    encRight = ENCODER_Read(RIGHT);
+
+    if(countEncLeft < pulseArret && countEncRight < pulseArret){
+      avanceDroit();
+    }
+    if(countEncLeft >= pulseArret && countEncRight >= pulseArret){
+      arretPID(distancePulse);
+    }
+    
+    countEncLeft += encLeft;
+    countEncRight += encRight;
+
+    ENCODER_Reset(LEFT);
+    ENCODER_Reset(RIGHT);
+    delay(10);
+  }
+}
+
 void rotation90(int direction){
   Kp = KP_TOURNE;
   Ki = KI_TOURNE;
   Kd = KD_TOURNE;
   float distanceCible = (pi * DiametreRobot) /(4 * CirconferenceRoue); // Rayon de la roue = 5cm
   float pulseCible = distanceCible * 3200;
+  sequence = ENCOURS;
 
   if(direction == LEFT){
     pulseCibleLeft = -pulseCible;
@@ -110,24 +143,29 @@ void rotation90(int direction){
   else{
     return;
   }
+  
+  while(sequence == ENCOURS)
+  {
+    encLeft = ENCODER_Read(LEFT);
+    encRight = ENCODER_Read(RIGHT);
 
-  vitesseRight = calculPid(countEncRight, vitesseRight, erreurPrecedenteRight, pulseCibleRight);
-  vitesseLeft = calculPid(countEncLeft, vitesseLeft, erreurPrecedenteLeft, pulseCibleLeft);
+    vitesseRight = calculPid(countEncRight, vitesseRight, erreurPrecedenteRight, pulseCibleRight);
+    vitesseLeft = calculPid(countEncLeft, vitesseLeft, erreurPrecedenteLeft, pulseCibleLeft);
+  
+    if(vitesseLeft <= 0.1 && vitesseRight <= 0.1)
+    {
+      arret();
+    }
+    MOTOR_SetSpeed(LEFT, vitesseLeft);
+    MOTOR_SetSpeed(RIGHT, vitesseRight);
 
-  MOTOR_SetSpeed(LEFT, vitesseLeft);
-  MOTOR_SetSpeed(RIGHT, vitesseRight);
-}
-
-void avance(float distance){
-  float distancePulse = distance / CirconferenceRoue * 3200;
-
-  float pulseArret = distancePulse * 0.9;
-
-  if(countEncLeft < pulseArret && countEncRight < pulseArret){
-    avanceDroit();
+    countEncLeft += encLeft;
+    countEncRight += encRight;
+  
+    ENCODER_Reset(LEFT);
+    ENCODER_Reset(RIGHT);
+    delay(10);
   }
-  if(countEncLeft >= pulseArret && countEncRight >= pulseArret){
-    Serial.println("stop");
-    arretPID(distancePulse);
-  }
+
+
 }

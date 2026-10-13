@@ -29,6 +29,12 @@ Retour : Rien.
 */
 void InitialiserMemoire()
 {
+    x = 1;
+    y = 0;
+    c = 0;
+    nbChoixAleatoires = 0;
+    direction = 0;
+
     int valeurs[3][10][5] = {// Contenu initial souhaité
                              {{0, 1, 1, 0, 0},
                               {0, 1, 0, 1, 0},
@@ -368,7 +374,7 @@ void Devant()
             Serial.println("8");
         }
             
-        Devant();
+        // Devant();
     }
     else
     {
@@ -396,34 +402,34 @@ void Devant()
     }
 }
 
-void setup()
-{
-    Serial.begin(9600);
-    BoardInit();
+// void setup()
+// {
+//     Serial.begin(9600);
+//     BoardInit();
     
-    pinMode(48, INPUT);
-    pinMode(49, INPUT);
-    delay(100);
+//     pinMode(48, INPUT);
+//     pinMode(49, INPUT);
+//     delay(100);
 
-    // Initialisation
-    x = 1;
-    y = 0;
-    c = 0;
-    nbChoixAleatoires = 0;
-    direction = 0;
-    actif = false;
-    InitialiserMemoire(); // Remplir le contenu du tableau
+//     // Initialisation
+//     x = 1;
+//     y = 0;
+//     c = 0;
+//     nbChoixAleatoires = 0;
+//     direction = 0;
+//     actif = false;
+//     InitialiserMemoire(); // Remplir le contenu du tableau
 
-    initialiserSon();
-    beep(3);
-}
+//     initialiserSon();
+//     beep(3);
+// }
 
-void loop()
-{
-    if(!actif && detecter5kHz()){
-        actif = true;
-        Devant();
-    }
+// void loop()
+// {
+//     if(!actif && detecter5kHz()){
+//         actif = true;
+//         Devant();
+//     }
 
-    else if (actif) Devant();
-}
+//     else if (actif) Devant();
+// }

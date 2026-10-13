@@ -24,6 +24,11 @@
 
 #define dt 0.01
 
+#define FINI 0
+#define ENCOURS 1
+#define PULSE_CIBLE_LEFT 60.53
+#define PULSE_CIBLE_RIGHT 60
+
 //*****VARIABLES GLOBALES*****//
 extern int32_t countEncLeft;
 extern int32_t countEncRight;
@@ -31,7 +36,6 @@ extern int32_t encLeft;
 extern int32_t encRight;
 extern float vitesseLeft;
 extern float vitesseRight;
-
 //********FONCTIONS********//
 void arret(void);
 float calculPid(int pulse, float vitesse, float &erreurPrecedente, float pulseCible);

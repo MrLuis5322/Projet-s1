@@ -11,6 +11,8 @@
 #include <LibRobus.h>
 #include <Arduino.h>
 #include "Mouvement.h"
+#include "Algorithme.h"
+#include "Son.h"
 
 //********CONSTANTES*******//
 #define EN_MARCHE 1
@@ -28,12 +30,15 @@ int etat = 0; // = 0 arrêt 1 = avance 2 = recule 3 = TourneDroit 4 = TourneGauc
 int etatPast = 0;
 
 //********FONCTIONS********//
-/*
+
 void setup(){
   BoardInit();
   
   pinMode(vertPin, INPUT);
   pinMode(rougePin, INPUT);
+
+  InitialiserMemoire();
+  initialiserSon();
   delay(100);
   Serial.println("Initialisation complete");
 }
@@ -41,7 +46,7 @@ void setup(){
 void loop() {
 
   //Test encodeurs PID
-  if(ROBUS_IsBumper(3)){
+  if(detecter5kHz()){
     etat = EN_MARCHE;
   }
   if(ROBUS_IsBumper(2)){
@@ -52,17 +57,7 @@ void loop() {
     return;
   }
 
-  encLeft = ENCODER_Read(LEFT);
-  encRight = ENCODER_Read(RIGHT);
-
-  avanceDroit();
-
-  countEncLeft += encLeft;
-  countEncRight += encRight;
-
-  ENCODER_Reset(LEFT);
-  ENCODER_Reset(RIGHT);
+  Devant();
   delay(10);
 }
 
-*/
