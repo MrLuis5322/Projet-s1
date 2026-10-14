@@ -93,11 +93,9 @@ bool CapteurDetecteMur()
     int rouge = digitalRead(49);
 
     if(!vert && !rouge){
-        Serial.println("3");
         return true;
     } 
     else{
-        Serial.println("4");
         return false;
     } 
 }
@@ -110,7 +108,6 @@ Retour : Booléen true si il y a un mur ou une ligne de tape devant le robot. Si
 bool MurDevant()
 {
     if (memoire[x][y][direction] == 1){
-        Serial.println("2");
         return true;
     }
     else if (CapteurDetecteMur()){
@@ -130,7 +127,6 @@ Retour : Rien.
 void Avancer(int p_nbCases)
 {
     avance(p_nbCases * 0.5);
-    delay(20000);
 
     switch (direction)
     {
@@ -148,7 +144,7 @@ void Avancer(int p_nbCases)
         break;
     }
 
-    memoire[x][y][4] == 1;
+    memoire[x][y][4] = 1;
 }
 
 /*
@@ -196,7 +192,7 @@ void Arriere()
             if (!MurDevant())
             {
                 Avancer(1);
-                if (x = c) // Si on se trouve dans la colonne souhaitée
+                if (x == c) // Si on se trouve dans la colonne souhaitée
                 {
                     Tourner(-90);
                     // Devant();
@@ -205,7 +201,7 @@ void Arriere()
                 else if (!MurDevant()) // Sinon, continuer à avancer
                 {
                     Avancer(1);
-                    if (x = c)
+                    if (x == c)
                     {
                         Tourner(-90);
                         // Devant();
@@ -225,7 +221,7 @@ void Arriere()
             if (!MurDevant())
             {
                 Avancer(1);
-                if (x = c) // Si on se trouve dans la colonne souhaitée
+                if (x == c) // Si on se trouve dans la colonne souhaitée
                 {
                     Tourner(90);
                     // Devant();
@@ -234,7 +230,7 @@ void Arriere()
                 else if (!MurDevant()) // Sinon, continuer à avancer
                 {
                     Avancer(1);
-                    if (x = c)
+                    if (x == c)
                     {
                         Tourner(90);
                         // Devant();
@@ -259,7 +255,6 @@ Retour : Rien.
 */
 void Gauche()
 {
-    Serial.println("5");
     Tourner(90);
     if (MurDevant()) // Si présence d'un mur à gauche, alors aller plutôt à droite
     {
@@ -294,6 +289,7 @@ void Gauche()
                             break;
                         }
                     }
+                    Serial.println(c);
                     Tourner(180);
                     Arriere();
                 }
@@ -310,7 +306,6 @@ Retour : Rien.
 */
 void Droite()
 {
-    Serial.println("6");
     Tourner(-90);
     if (MurDevant())  // Si présence d'un mur à droite, alors aller plutôt à gauche
     {
@@ -345,6 +340,7 @@ void Droite()
                             break;
                         }
                     }
+                    Serial.println(c);
                     Tourner(180);
                     Arriere();
                 }
@@ -361,24 +357,20 @@ Retour : Rien.
 */
 void Devant()
 {
-    Serial.println("7");
     if (!MurDevant()) 
     {
         if (y == 8) // Cas où le robot est à une case de la fin
         {
             Avancer(1);
-            Serial.println("9");
         }
         else {
             Avancer(2);
-            Serial.println("8");
         }
             
         // Devant();
     }
     else
     {
-        Serial.println("10");
         if (y != 9)
         {
             if (x == 0)
@@ -397,7 +389,6 @@ void Devant()
         }
         else{
             actif = false;
-            Serial.println("11");
         }
     }
 }
