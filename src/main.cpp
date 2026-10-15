@@ -15,8 +15,8 @@
 #include "Son.h"
 
 //********CONSTANTES*******//
-#define EN_MARCHE 1
-#define ARRET 0
+#define EN_MARCHE true
+#define ARRET false
 
 const int vertPin = 48;
 const int rougePin = 49;
@@ -26,8 +26,7 @@ const int rougePin = 49;
 bool bumperArr; //variable vrai ou faux
 bool vert = false;
 bool rouge = false;
-int etat = 0; // = 0 arrêt 1 = avance 2 = recule 3 = TourneDroit 4 = TourneGauche
-int etatPast = 0;
+int etat = false; 
 
 //********FONCTIONS********//
 
@@ -37,13 +36,15 @@ void setup(){
   pinMode(vertPin, INPUT);
   pinMode(rougePin, INPUT);
 
-  InitialiserMemoire();
+  InitialiserAlgorithme();
   initialiserSon();
   delay(100);
   Serial.println("Initialisation complete");
 }
 
 void loop() {
+
+  if(etat) etat = GetEtat();
 
   //Test encodeurs PID
   if(detecter5kHz()){

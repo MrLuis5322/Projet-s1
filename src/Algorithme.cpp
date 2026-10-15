@@ -27,13 +27,14 @@ Fonction : Remplir le contenu qui contient les informations sur les cases.
 Entrée : Rien
 Retour : Rien.
 */
-void InitialiserMemoire()
+void InitialiserAlgorithme()
 {
     x = 1;
     y = 0;
     c = 0;
     nbChoixAleatoires = 0;
     direction = 0;
+    actif = true;
 
     int valeurs[3][10][5] = {// Contenu initial souhaité
                              {{0, 1, 1, 0, 0},
@@ -47,16 +48,16 @@ void InitialiserMemoire()
                               {0, 1, 0, 0, 0},
                               {1, 1, 0, 1, 0}},
 
-                             {{0, 0, 1, 0, 1},
+                             {{1, 0, 1, 0, 1},
+                              {1, 1, 1, 1, 0},
+                              {1, 0, 1, 0, 0},
+                              {1, 1, 1, 1, 0},
+                              {0, 0, 1, 0, 0},
                               {0, 1, 0, 1, 0},
-                              {0, 0, 0, 0, 0},
-                              {0, 1, 0, 1, 0},
-                              {0, 0, 0, 0, 0},
-                              {0, 1, 0, 1, 0},
-                              {0, 0, 0, 0, 0},
-                              {0, 1, 0, 1, 0},
-                              {0, 0, 0, 0, 0},
-                              {1, 1, 0, 1, 0}},
+                              {1, 0, 0, 0, 0},
+                              {1, 1, 1, 1, 0},
+                              {1, 0, 1, 0, 0},
+                              {1, 1, 1, 1, 0}},
 
                              {{0, 0, 1, 1, 0},
                               {0, 1, 0, 1, 0},
@@ -80,6 +81,10 @@ void InitialiserMemoire()
             }
         }
     }
+}
+
+bool GetEtat(){
+    return actif;
 }
 
 /*
@@ -156,6 +161,7 @@ Retour : Rien.
 void Tourner(int p_angle)
 {
     int p_direction = LEFT;
+
     if (p_angle < 0) {
         p_direction = RIGHT;
     }
@@ -167,8 +173,6 @@ void Tourner(int p_angle)
     for (int i = 0; i < abs(nbQuartTourATourner); i++){
         rotation90(p_direction);
     }
-
-    // FAIRE TOURNER LE ROBOT ICI
 
     direction += nbQuartTourATourner;
     direction = ((direction % 4) + 4) % 4;
@@ -350,6 +354,30 @@ void Droite()
 }
 
 /*
+Fonction : Dicter la séquence finale de mouvements, 
+           lorsque le robot est à l'avant dernière rangée et qu'il est libre d'avancer
+Entrée : Rien
+Retour : Rien.
+*/
+void SequenceFin()
+{
+    Avancer(2);
+    if (x == 0) {
+        Tourner(-90);
+        Avancer(1);
+        Tourner(-90);
+    }
+    else if (x == 2) {
+        Tourner(90);
+        Avancer(1);
+        Tourner(90);
+    }
+    Avancer(10);
+    beep(5);
+    actif = false;
+}
+
+/*
 Fonction : Dicter une séquence de mouvements lorsque le robot est immobile, face vers l'avant,
            et qu'il n'a aucune information quant au tracé du labyrinthe à la hauteur où il se trouve.
 Entrée : Rien
@@ -361,7 +389,7 @@ void Devant()
     {
         if (y == 8) // Cas où le robot est à une case de la fin
         {
-            Avancer(1);
+            SequenceFin();
         }
         else {
             Avancer(2);
@@ -387,40 +415,5 @@ void Devant()
                     Gauche();
             }
         }
-        else{
-            actif = false;
-        }
     }
 }
-
-// void setup()
-// {
-//     Serial.begin(9600);
-//     BoardInit();
-    
-//     pinMode(48, INPUT);
-//     pinMode(49, INPUT);
-//     delay(100);
-
-//     // Initialisation
-//     x = 1;
-//     y = 0;
-//     c = 0;
-//     nbChoixAleatoires = 0;
-//     direction = 0;
-//     actif = false;
-//     InitialiserMemoire(); // Remplir le contenu du tableau
-
-//     initialiserSon();
-//     beep(3);
-// }
-
-// void loop()
-// {
-//     if(!actif && detecter5kHz()){
-//         actif = true;
-//         Devant();
-//     }
-
-//     else if (actif) Devant();
-// }

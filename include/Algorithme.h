@@ -16,7 +16,8 @@
 //Aucune
 
 //********FONCTIONS********//
-void InitialiserMemoire(void);
+void InitialiserAlgorithme(void);
+bool GetEtat(void);
 void Devant(void);
 
 #endif
