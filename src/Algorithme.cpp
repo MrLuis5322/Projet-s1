@@ -14,6 +14,8 @@ Date: 2026-10-01
 #include "Mouvement.h"
 #include "Son.h"
 
+float LONGUEUR_CASE = 0.469;
+
 int x;                 // Position horizontale dans la grille {0; 1; 2}
 int y;                 // Position verticale dans la grille {0; 1; 2; 3; 4; 5; 6; 7; 8; 9}
 int c;                 // Colonne (x) souhaitée dans le contexte où le robot doit reculer
@@ -131,7 +133,7 @@ Retour : Rien.
 */
 void Avancer(int p_nbCases)
 {
-    avance(p_nbCases * 0.5);
+    avance(p_nbCases * LONGUEUR_CASE);
 
     switch (direction)
     {
@@ -372,7 +374,7 @@ void SequenceFin()
         Avancer(1);
         Tourner(90);
     }
-    Avancer(10);
+    retourFinal();
     beep(5);
     actif = false;
 }

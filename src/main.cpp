@@ -47,7 +47,7 @@ void loop() {
   if(etat) etat = GetEtat();
 
   //Test encodeurs PID
-  if(ROBUS_IsBumper(3)){
+  if(detecter5kHz()){
     etat = EN_MARCHE;
   }
   if(ROBUS_IsBumper(2)){
@@ -58,7 +58,7 @@ void loop() {
     return;
   }
 
-  rotation90(LEFT);
-  delay(5000);
+  Devant();
+  delay(10);
 }
 

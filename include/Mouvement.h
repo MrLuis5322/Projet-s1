@@ -40,6 +40,7 @@ extern float vitesseRight;
 void arret(void);
 float calculPid(int pulse, float vitesse, float &erreurPrecedente, float pulseCible);
 void avanceDroit(void);
+void retourFinal(void);
 void arretPID(float distance);
 void rotation90(int direction);
 void avance(float distance);
