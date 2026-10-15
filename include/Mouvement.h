@@ -18,9 +18,9 @@
 #define KI_ARRET 0.4
 #define KD_ARRET 0.3
 
-#define KP_TOURNE 0.002
-#define KI_TOURNE 0.0
-#define KD_TOURNE 0.05
+#define KP_TOURNE 0.001
+#define KI_TOURNE 0.001
+#define KD_TOURNE 0.025
 
 #define dt 0.01
 

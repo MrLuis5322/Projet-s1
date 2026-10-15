@@ -18,7 +18,7 @@ const int rougePin = 49;
 
 const float diametreRoue = 0.0762; // en mètre
 const float pi = 3.14159;
-const float DiametreRobot = 0.20; // en mètre
+const float DiametreRobot = 0.205; // en mètre
 const float CirconferenceRoue = pi * diametreRoue; // en mètre
 
 //********VARIABLES********//
@@ -152,7 +152,7 @@ void rotation90(int direction){
     vitesseRight = calculPid(countEncRight, vitesseRight, erreurPrecedenteRight, pulseCibleRight);
     vitesseLeft = calculPid(countEncLeft, vitesseLeft, erreurPrecedenteLeft, pulseCibleLeft);
   
-    if(vitesseLeft <= 0.1 && vitesseRight <= 0.1)
+    if(vitesseLeft <= 0.087 && vitesseRight <= 0.087)
     {
       arret();
     }
