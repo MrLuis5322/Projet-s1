@@ -18,7 +18,7 @@ const int rougePin = 49;
 
 const float diametreRoue = 0.0762; // en mètre
 const float pi = 3.14159;
-const float DiametreRobot = 0.20; // en mètre
+const float DiametreRobot = 0.19; // en mètre
 const float CirconferenceRoue = pi * diametreRoue; // en mètre
 
 //********VARIABLES********//
