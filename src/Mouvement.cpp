@@ -126,8 +126,8 @@ void avance(float distance){
 
 void retourFinal() {
   float distancePulse = 5.7 / CirconferenceRoue * 3200;
-  float pulseArret = distancePulse * 0.8;
-  pulseCibleLeft = 76;
+  float pulseArret = distancePulse * 0.90;
+  pulseCibleLeft = 76.07;
   pulseCibleRight = 75;
   sequence = ENCOURS;
 
@@ -140,7 +140,7 @@ void retourFinal() {
       avanceDroit();
     }
     if(countEncLeft >= pulseArret && countEncRight >= pulseArret){
-      arretPID(distancePulse);
+      arret();
     }
     
     countEncLeft += encLeft;
@@ -161,10 +161,12 @@ void rotation90(int direction){
   sequence = ENCOURS;
 
   if(direction == LEFT){
+    pulseCible = pulseCible + 30 ;
     pulseCibleLeft = -pulseCible;
     pulseCibleRight = pulseCible;
   }
   else if(direction == RIGHT){
+    pulseCible = pulseCible + 45;
     pulseCibleLeft = pulseCible;
     pulseCibleRight = -pulseCible;
   }
@@ -180,7 +182,7 @@ void rotation90(int direction){
     vitesseRight = calculPid(countEncRight, vitesseRight, erreurPrecedenteRight, pulseCibleRight);
     vitesseLeft = calculPid(countEncLeft, vitesseLeft, erreurPrecedenteLeft, pulseCibleLeft);
   
-    if(vitesseLeft <= 0.085 && vitesseRight <= 0.085)
+    if(vitesseLeft <= 0.09 && vitesseRight <= 0.09)
     {
       arret();
     }
@@ -194,6 +196,4 @@ void rotation90(int direction){
     ENCODER_Reset(RIGHT);
     delay(10);
   }
-
-
 }

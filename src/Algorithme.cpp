@@ -14,7 +14,7 @@ Date: 2026-10-01
 #include "Mouvement.h"
 #include "Son.h"
 
-float LONGUEUR_CASE = 0.469;
+float LONGUEUR_CASE = 0.46;
 
 int x;                 // Position horizontale dans la grille {0; 1; 2}
 int y;                 // Position verticale dans la grille {0; 1; 2; 3; 4; 5; 6; 7; 8; 9}
@@ -304,6 +304,7 @@ void Gauche()
     }
 }
 
+
 /*
 Fonction : Dicter une séquence de mouvements lorsque le robot est immobile, face vers l'avant,
            et qu'il sait qu'il doit s'en aller vers sa droite.
@@ -419,3 +420,25 @@ void Devant()
         }
     }
 }
+/*
+void Droite()
+{
+    Tourner(-90);
+    if (MurDevant())  // Si présence d'un mur à droite, alors aller plutôt à gauche
+    {
+        Tourner(90);
+        // Gauche();
+        return;
+    }
+    else
+    {
+        Avancer(1);
+        if(!MurDevant()){
+            Avancer(1);
+        }
+        else{
+            Tourner(90);
+            Devant();            
+        }
+    }
+}*/
