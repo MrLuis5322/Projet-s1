@@ -56,15 +56,4 @@ void loop() {
     return;
   }
 
-  // Une etape peut sonder plusieurs directions bloquees, mais ne deplace le
-  // robot que d'une case au maximum avant de rendre la main a loop().
-  if (!parcoursTermine()) {
-    parcourirUneEtape();
-    if (parcoursTermine()) {
-      arret();
-      beep(parcoursReussi() ? 3 : 5);
-    }
-  } else {
-    arret();
-  }
 }

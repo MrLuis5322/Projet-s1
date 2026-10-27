@@ -40,33 +40,6 @@ static long distanceEnTicks(float distanceCM, int encodeur) {
   return lround(distanceCM / CM_PAR_TICK_D);
 }
 
-// Reculer du nombre de ticks mesure pendant l'avance permet a une sonde
-// interrompue par un mur de repartir approximativement du centre de sa case.
-static void revenirAuPointDeDepart() {
-  arret();
-  delay(100);
-
-  long encodeurG = ENCODER_Read(0);
-  long encodeurD = ENCODER_Read(1);
-  MOTOR_SetSpeed(LEFT, encodeurG > 10 ? -vitesse_Gauche * 0.35f : 0);
-  MOTOR_SetSpeed(RIGHT, encodeurD > 10 ? -vitesse_Droite * 0.35f : 0);
-
-  // Chaque moteur s'arrete lorsqu'il a annule sa propre avance.
-  while (ENCODER_Read(0) > 10 || ENCODER_Read(1) > 10) {
-    if (ENCODER_Read(0) <= 10) {
-      MOTOR_SetSpeed(LEFT, 0);
-    }
-    if (ENCODER_Read(1) <= 10) {
-      MOTOR_SetSpeed(RIGHT, 0);
-    }
-    delay(1);
-  }
-
-  arret();
-}
-
-// Avance de la distance demandee. Retourne false si le capteur avant detecte
-// un obstacle; dans ce cas, le robot est ramene vers son point de depart.
 bool mouvementAvant(float distanceCM) {
   if (distanceCM <= 0) {
     arret();
@@ -78,49 +51,19 @@ bool mouvementAvant(float distanceCM) {
 
   ENCODER_Reset(0);
   ENCODER_Reset(1);
-  ObstacleDetecte = false;
 
   MOTOR_SetSpeed(LEFT, vitesse_Gauche);
   MOTOR_SetSpeed(RIGHT, vitesse_Droite);
-
-  bool ralentissement1 = false;
-  bool ralentissement2 = false;
 
   // Le OR garantit que les deux roues atteignent leur cible, meme si une roue
   // prend un peu d'avance sur l'autre.
   while (ENCODER_Read(0) < CibleG || ENCODER_Read(1) < CibleD) {
     long encodeurG = ENCODER_Read(0);
     long encodeurD = ENCODER_Read(1);
-
-    detecterObstacle();
-    if (ObstacleDetecte) {
-      revenirAuPointDeDepart();
-      ObstacleDetecte = false;
-      return false;
-    }
-
-    // Deux ralentissements limitent le depassement a l'approche de la cible.
-    if (!ralentissement1 &&
-        encodeurG >= CibleG - 700 &&
-        encodeurD >= CibleD - 700) {
-      MOTOR_SetSpeed(LEFT, vitesse_Gauche * 0.7f);
-      MOTOR_SetSpeed(RIGHT, vitesse_Droite * 0.7f);
-      ralentissement1 = true;
-    }
-
-    if (!ralentissement2 &&
-        encodeurG >= CibleG - 400 &&
-        encodeurD >= CibleD - 400) {
-      MOTOR_SetSpeed(LEFT, vitesse_Gauche * 0.35f);
-      MOTOR_SetSpeed(RIGHT, vitesse_Droite * 0.35f);
-      ralentissement2 = true;
-    }
-
     delay(1);
   }
 
   arret();
-  return true;
 }
 
 // Fait pivoter le robot autour de son centre; un angle positif tourne a droite.
@@ -153,11 +96,4 @@ void tourne(float angleDegres) {
   }
 
   arret();
-}
-
-// Annule une avance interrompue et retrouve le point de depart a l'aide des
-// ticks encore disponibles dans les encodeurs.
-void annulerMouvement() {
-  revenirAuPointDeDepart();
-  ObstacleDetecte = false;
 }
