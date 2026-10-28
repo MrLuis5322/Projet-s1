@@ -7,7 +7,6 @@ extern float vitesse_Gauche;
 extern float vitesse_Droite;
 
 
-
 enum EtatRobot {
   ETAT_ARRET = 0,
   ETAT_AVANCE = 1,
@@ -18,7 +17,7 @@ enum EtatRobot {
 
 void arret();
 void tourne(float angleDegres);
-bool mouvementAvant(float DistanceCM);
+void mouvementAvant(float DistanceCM);
 void annulerMouvement();
 
 #endif

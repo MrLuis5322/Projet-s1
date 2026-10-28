@@ -14,6 +14,7 @@ Inclure les librairies de functions que vous voulez utiliser
 #include <DetecteurProximite.h>
 #include <Parcours.h>
 #include "Son.h"
+#include <EtapeCombattant.h>
 
 
 /*
@@ -42,18 +43,32 @@ void setup(){
   delay(1000);
   beep(1);
   initialiserSon();
-  initialiserParcours();
+  // Les bumpers sont lus dans loop(); on commence sans mouvement.
+  arret();
 }
 
 void loop() {
-  // Attend le signal de depart et maintient le robot a l'arret entre-temps.
-  if (!robotDemarre) {
-    arret();
-    if (detecter5kHz()) {
-      robotDemarre = true;
-      beep(2);
-    }
-    return;
-  }
 
+  bool Arr = ROBUS_IsBumper(3);
+  if (Arr) {
+    delay(500);
+    mouvementAvant(150.0f);
+    arret();
+    }
+
+  bool Gauche = ROBUS_IsBumper(0);
+  if (Gauche) {
+    delay(1000);
+    tourne(-90);
+  }
+  bool Droite = ROBUS_IsBumper(1);
+    if (Droite) {
+      delay(1000);
+      tourne(90);
+    }
+  bool Av = ROBUS_IsBumper(2);
+    if (Av) {
+      delay(500);
+      EtapeRouge();
+    }
 }
