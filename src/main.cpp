@@ -33,6 +33,8 @@ int etatPast = 0;
 Fonctions d'initialisation (setup)
 */
 
+
+
 void setup(){
   BoardInit();
   initialiserDetecteurProximite();
@@ -42,7 +44,8 @@ void setup(){
   delay(1000);
   beep(1);
   initialiserSon();
-  initialiserCapteur();
+  initialiserCapteurCouleur();
+
   // Les bumpers sont lus dans loop(); on commence sans mouvement.
   arret();
 }
@@ -61,11 +64,12 @@ void loop() {
     delay(1000);
     tourne(-90);
   }
-  bool Droite = ROBUS_IsBumper(1);
-    if (Droite) {
-      delay(1000);
-      tourne(90);
-    }
+  // Bumper 1 : lance la calibration des couleurs
+  bool droite = ROBUS_IsBumper(1);
+  if (droite) {
+    delay(500);          
+    modeCalibration();
+  }
   bool Av = ROBUS_IsBumper(2);
     if (Av) {
       delay(500);

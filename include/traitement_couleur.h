@@ -9,9 +9,7 @@ enum CouleurId {
     JAUNE,
     ORANGE,
     BLEU,
-    VERT,
-    PLANCHER,
-    LIGNE
+    VERT
 };
 
 // Structure RGB
@@ -25,7 +23,7 @@ struct Couleur {
 const int NB_ECHANTILLONS = 10;
 
 // Fonctions
-bool initialiserCapteur();
+bool initialiserCapteurCouleur();
 
 void ajouterEchantillon(Couleur c);
 
@@ -40,5 +38,8 @@ String nomCouleur(CouleurId id);
 Couleur lireCapteur();
 
 void calibrerCouleur(const char* nom, int duree_ms);
+
+void modeCalibration();
+
 
 #endif

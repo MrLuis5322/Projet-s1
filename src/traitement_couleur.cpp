@@ -3,18 +3,18 @@
 #include <Wire.h>
 #include <Adafruit_TCS34725.h>
 #include "traitement_couleur.h"
+#include <LibRobus.h>
 
 
 // Initialisation du capteur
 Adafruit_TCS34725 capteur = Adafruit_TCS34725(
-    TCS34725_INTEGRATIONTIME_50MS,
+    TCS34725_INTEGRATIONTIME_50MS, 
     TCS34725_GAIN_4X
 );
 
-bool initialiserCapteur() {
+bool initialiserCapteurCouleur() {
     return capteur.begin();
 }
-
 
 // ---------------------------------------------------------------
 // tableau d'échantillons de couleurs
@@ -30,7 +30,8 @@ static int nbRecues = 0;
 Couleur lireCapteur() {
     Couleur c;
 
-    uint16_t rouge, vert, bleu, clair;
+    uint16_t rouge, vert, bleu, clair;  //j'utilise pas le valeur de clair pour l'instant,
+                                        // mais on peut l'utiliser pour la luminosité si besoin
 
     capteur.getRawData(&rouge, &vert, &bleu, &clair);
 
@@ -92,15 +93,13 @@ CouleurId identifierCouleur(Couleur m) {
   // if (...>m.R > ... && ...>m.G > ... && ...<m.B < ...) return ORANGE;
   // if (...>m.B > ... && ...<m.R < ... && ...<m.G < ...) return BLEU;
   // if (...>m.G > ... && ...<m.R < ... && ...<m.B < ...) return VERT;
-  // if (...>m.G > ... && ...<m.R < ... && ...<m.B < ...) return PLANCHER;
-  // if (...>m.G > ... && ...<m.R < ... && ...<m.B < ...) return LIGNE;
   // ---------------------------------------------------------
   return AUCUN;
 }
 
 // ---------------------------------------------------------------
 // DÉBOGAGE
-//change le numéro de couleur en texte pour affichage (ex: 1 -> "ROSE")
+//change le numéro de couleur en texte pour affichage (ex: 1 -> "ROSE"), pour vérifier le fonctionnement du code
 // ---------------------------------------------------------------
 String nomCouleur(CouleurId id) {
   switch (id) {
@@ -109,14 +108,12 @@ String nomCouleur(CouleurId id) {
     case ORANGE: return "Orange";
     case BLEU:   return "Bleu";
     case VERT:   return "Vert";
-    case PLANCHER: return "Plancher";
-    case LIGNE:  return "Ligne";
     default:     return "Aucune";
   }
 }
 // ---------------------------------------------------------------
 // CALIBRATION DE LA COULEUR
-//utiliser pour trouver les seuils de couleur
+//utiliser pour trouver les seuils de couleur seulement, ne pas utiliser dans le programme final
 // ---------------------------------------------------------------
 
 void calibrerCouleur(const char* nom, int duree_ms) {   
@@ -159,4 +156,15 @@ void calibrerCouleur(const char* nom, int duree_ms) {
     Serial.print(" | B: "); Serial.print(minB);
     Serial.print(" a ");    Serial.print(maxB);
     Serial.print(" (moy "); Serial.print(sommeB / n); Serial.println(")");
+}
+
+void modeCalibration() {
+  const char* noms[] = {"Rose", "Jaune", "Orange", "Bleu", "Vert"};
+  for (int i = 0; i < 5; i++) {                           //boucle sur les couleurs à calibrer
+    Serial.print("Place le capteur sur : ");
+    Serial.println(noms[i]);
+    while (!ROBUS_IsBumper(2)) {}   // attend l'appui sur le bumper avant
+    delay(500);
+    calibrerCouleur(noms[i], 3000); // lit pendant 3 secondes
+  }
 }
