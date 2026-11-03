@@ -15,8 +15,7 @@ Inclure les librairies de functions que vous voulez utiliser
 #include <Parcours.h>
 #include "Son.h"
 #include <EtapeCombattant.h>
-
-
+#include <traitement_couleur.h>
 /*
 Variables globales et defines
 */
@@ -43,6 +42,7 @@ void setup(){
   delay(1000);
   beep(1);
   initialiserSon();
+  initialiserCapteur();
   // Les bumpers sont lus dans loop(); on commence sans mouvement.
   arret();
 }
@@ -72,3 +72,4 @@ void loop() {
       EtapeRouge();
     }
 }
+

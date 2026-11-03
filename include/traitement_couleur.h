@@ -1,28 +1,31 @@
 #ifndef TRAITEMENT_COULEUR_H
 #define TRAITEMENT_COULEUR_H
 
-#include <Arduino.h>
 
-// ---------------------------------------------------------------
-// DÉFINITION DES COULEURS
-// ---------------------------------------------------------------
-enum CouleurId {AUCUN, ROSE, JAUNE, ORANGE, BLEU, VERT, PLANCHER, LIGNE};
+// Définition des couleurs
+enum CouleurId {
+    AUCUN,
+    ROSE,
+    JAUNE,
+    ORANGE,
+    BLEU,
+    VERT,
+    PLANCHER,
+    LIGNE
+};
 
+// Structure RGB
 struct Couleur {
     float R;
     float G;
     float B;
 };
 
-// ---------------------------------------------------------------
-// CONSTANTE
-// ---------------------------------------------------------------
-// Nombre d'échantillons pour trouver la couleur du parcours
+// Constante
 const int NB_ECHANTILLONS = 10;
 
-// ---------------------------------------------------------------
-// FONCTIONS 
-// ---------------------------------------------------------------
+// Fonctions
+bool initialiserCapteur();
 
 void ajouterEchantillon(Couleur c);
 

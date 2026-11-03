@@ -1,6 +1,19 @@
 
 //librairies 
+#include <Wire.h>
+#include <Adafruit_TCS34725.h>
 #include "traitement_couleur.h"
+
+
+// Initialisation du capteur
+Adafruit_TCS34725 capteur = Adafruit_TCS34725(
+    TCS34725_INTEGRATIONTIME_50MS,
+    TCS34725_GAIN_4X
+);
+
+bool initialiserCapteur() {
+    return capteur.begin();
+}
 
 
 // ---------------------------------------------------------------
@@ -14,14 +27,19 @@ static int nbRecues = 0;
 // ---------------------------------------------------------------
 // LECTURE DU CAPTEUR (dépend du capteur utilisé, à compléter)
 // ---------------------------------------------------------------
-// Couleur lireCapteur() {
-//   Couleur c;
-//   c.r = ...;
-//   c.g = ...;
-//   c.b = ...;
-//   return c;
-// }
+Couleur lireCapteur() {
+    Couleur c;
 
+    uint16_t rouge, vert, bleu, clair;
+
+    capteur.getRawData(&rouge, &vert, &bleu, &clair);
+
+    c.R = rouge;
+    c.G = vert;
+    c.B = bleu;
+
+    return c;
+}
 //---------------------------------------------------------------
 // MÉMOIRE DES ÉCHANTILLONS
 // ---------------------------------------------------------------
