@@ -4,7 +4,7 @@
 #include <MegaServo.h>
 
 //Déclaration variables globales
-static const int pinServo = 9; // Pin du servo de la pince (à ajuster)
+static const int pinServo = 4; // Pin du servo de la pince (à ajuster)
 static const int angleOuverture = 0; // à ajuster
 static const int angleFermeture = 90; // à ajuster
 

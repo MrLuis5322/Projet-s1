@@ -37,8 +37,8 @@ int etatPast = 0;
 const int LED_ROSE = 32;
 const int LED_JAUNE = 33;
 const int LED_ORANGE = 38;
-const int LED_BLEU = 39;
-const int LED_VERT = 40;
+const int LED_BLEU = 44; //fonctionne pas
+const int LED_VERT = 46; //fonctionne pas
 const int LECTURES_COULEUR_REQUISES = 8;
 volatile int ledChronometree = -1;
 volatile uint16_t ticksLed = 0;
@@ -47,7 +47,7 @@ volatile uint16_t ticksLed = 0;
 // bloquante. Le timer continue d'utiliser sa configuration PWM existante.
 ISR(TIMER3_OVF_vect) {
   // Avec le PWM 8 bits Arduino (horloge / 64), un overflow dure 1,024 ms.
-  if (ledChronometree >= 0 && ++ticksLed >= 9766) {
+  if (ledChronometree >= 0 && ++ticksLed >= 4900) {
     digitalWrite(ledChronometree, LOW);
     ledChronometree = -1;
     TIMSK3 &= ~_BV(TOIE3);
