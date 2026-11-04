@@ -71,9 +71,6 @@ int lecturesCouleurStables = 0;
 /*
 Fonctions d'initialisation (setup)
 */
-
-
-
 void setup(){
   BoardInit();
   pinMode(LED_ROSE, OUTPUT);
