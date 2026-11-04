@@ -42,7 +42,7 @@ const int LED_BLEU = 39;
 const int LED_VERT = 40;
 const int LECTURES_COULEUR_REQUISES = 8;
 volatile int ledChronometree = -1;
-volatile uint8_t secondesLed = 0;
+volatile uint16_t ticksLed = 0;
 
 // Timer3 overflow coupe la LED à 10 secondes même pendant une épreuve
 // bloquante. Le timer continue d'utiliser sa configuration PWM existante.
@@ -59,7 +59,7 @@ void allumerLedDixSecondes(int pin) {
   noInterrupts();
   digitalWrite(pin, HIGH);
   ledChronometree = pin;
-  secondesLed = 0;
+  ticksLed = 0;
   TCNT1 = 0;
   TIFR1 = _BV(OCF1A); // efface une interruption compare en attente
   TIMSK1 |= _BV(OCIE1A);
