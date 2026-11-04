@@ -16,6 +16,8 @@ Inclure les librairies de functions que vous voulez utiliser
 #include "Son.h"
 #include <EtapeCombattant.h>
 #include <traitement_couleur.h>
+#include <pince.h>
+#include <avr/interrupt.h>
 /*
 Variables globales et defines
 */
@@ -29,14 +31,62 @@ bool bumperArr; //3
 int etat = 0; // = 0=Arret 1=Avance 2=Droite 3=Gauche 4=Recule 
 int etatPast = 0;
 
+const int LED_ROSE = 22;
+const int LED_JAUNE = 24;
+const int LED_ORANGE = 26;
+const int LED_BLEU = 28;
+// D30 est déjà utilisé comme direction moteur dans ArduinoX.
+// Déplacer la LED verte sur D32.
+const int LED_VERT = 32;
+const int LECTURES_COULEUR_REQUISES = 8;
+volatile int ledChronometree = -1;
+volatile uint8_t secondesLed = 0;
+
+// Timer1 coupe la LED à 10 secondes même pendant une épreuve bloquante.
+ISR(TIMER1_COMPA_vect) {
+  if (ledChronometree >= 0 && ++secondesLed >= 10) {
+    digitalWrite(ledChronometree, LOW);
+    ledChronometree = -1;
+    TIMSK1 &= ~_BV(OCIE1A);
+  }
+}
+
+void allumerLedDixSecondes(int pin) {
+  noInterrupts();
+  digitalWrite(pin, HIGH);
+  ledChronometree = pin;
+  secondesLed = 0;
+  TCNT1 = 0;
+  TIFR1 = _BV(OCF1A); // efface une interruption compare en attente
+  TIMSK1 |= _BV(OCIE1A);
+  interrupts();
+}
+
+// Confirmation des lectures pour eviter plusieurs sequences de bips
+// lorsque le capteur oscille entre deux couleurs.
+CouleurId couleurCandidate = AUCUN;
+CouleurId derniereCouleurAnnoncee = AUCUN;
+int lecturesCouleurStables = 0;
+
 /*
 Fonctions d'initialisation (setup)
 */
-
-
-
 void setup(){
   BoardInit();
+  pinMode(LED_ROSE, OUTPUT);
+  pinMode(LED_JAUNE, OUTPUT);
+  pinMode(LED_ORANGE, OUTPUT);
+  pinMode(LED_BLEU, OUTPUT);
+  pinMode(LED_VERT, OUTPUT);
+  digitalWrite(LED_ROSE, LOW);
+  digitalWrite(LED_JAUNE, LOW);
+  digitalWrite(LED_ORANGE, LOW);
+  digitalWrite(LED_BLEU, LOW);
+  digitalWrite(LED_VERT, LOW);
+  // Timer1 en mode CTC : une interruption par seconde (16 MHz / 1024).
+  TCCR1A = 0;
+  TCCR1B = _BV(WGM12) | _BV(CS12) | _BV(CS10);
+  OCR1A = 15624;
   initialiserDetecteurProximite();
   Serial.begin(115200);
   ENCODER_Reset(0);
@@ -45,12 +95,55 @@ void setup(){
   beep(1);
   initialiserSon();
   initialiserCapteurCouleur();
+  initialiserPince();
 
   // Les bumpers sont lus dans loop(); on commence sans mouvement.
   arret();
 }
 
 void loop() {
+
+  CouleurId couleurLue = identifierCouleur(lireCapteur());
+  if (couleurLue == couleurCandidate) {
+    if (lecturesCouleurStables < 3) lecturesCouleurStables++;
+  } else {
+    couleurCandidate = couleurLue;
+    lecturesCouleurStables = 1;
+  }
+
+  if (lecturesCouleurStables >= LECTURES_COULEUR_REQUISES &&
+      couleurCandidate == AUCUN) {
+    derniereCouleurAnnoncee = AUCUN;
+  }
+
+  if (lecturesCouleurStables >= LECTURES_COULEUR_REQUISES &&
+      couleurCandidate != AUCUN && couleurCandidate != derniereCouleurAnnoncee) {
+    int nombreBips = 0;
+    int led = -1;
+    switch (couleurCandidate) {
+      case ROSE:   nombreBips = 1; led = LED_ROSE; break;
+      case JAUNE:  nombreBips = 2; led = LED_JAUNE; break;
+      case ORANGE: nombreBips = 3; led = LED_ORANGE; break;
+      case BLEU:   nombreBips = 4; led = LED_BLEU; break;
+      case VERT:   nombreBips = 5; led = LED_VERT; break;
+      default: break;
+    }
+
+    if (nombreBips > 0) {
+      allumerLedDixSecondes(led);
+      beep(nombreBips);
+      switch (couleurCandidate) {
+        case ROSE:   EtapeRouge(); break; 
+        case JAUNE:  EtapeJaune(); break;
+        case ORANGE: EtapeOrange(); break;
+        case BLEU:   EtapeBleu(); break;
+        case VERT:   EtapeVert(); break;
+        default: break;
+      }
+
+    }
+    derniereCouleurAnnoncee = couleurCandidate;
+  }
 
   bool Arr = ROBUS_IsBumper(3);
   if (Arr) {

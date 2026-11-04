@@ -1,7 +1,7 @@
 #include <math.h>
 #include <LibRobus.h>
 #include <Mouvement.h>
-
+#include <pince.h>
 
 void continuer(){
     
@@ -45,7 +45,6 @@ void EtapeRouge () {
     // move on - REPRISE DU CODE DU SUIVEUR DE LIGNE
 
     }
-// A MODIFIER 
 void EtapeOrange () {
     // Se déplace jusqu'au bout du cercle et fait le tour, il devrait théoriquement avoir
     // le verre dans sa pince donc il faut attraper a la fin, mais je n'ai pas la fonction pince
@@ -59,7 +58,8 @@ void EtapeOrange () {
         delay(150);
         tourne(28);
         delay(150);
-    }        
+    }     
+    pinceFermeture();   
     tourne(-89); // tweak l'angle si le capteur voit pas la ligne
     delay(150);
     // move on - REPRISE DU CODE DU SUIVEUR DE LIGNE
