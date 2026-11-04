@@ -29,6 +29,12 @@ bool bumperArr; //3
 int etat = 0; // = 0=Arret 1=Avance 2=Droite 3=Gauche 4=Recule 
 int etatPast = 0;
 
+// Confirmation des lectures pour eviter plusieurs sequences de bips
+// lorsque le capteur oscille entre deux couleurs.
+CouleurId couleurCandidate = AUCUN;
+CouleurId derniereCouleurAnnoncee = AUCUN;
+int lecturesCouleurStables = 0;
+
 /*
 Fonctions d'initialisation (setup)
 */
@@ -51,6 +57,29 @@ void setup(){
 }
 
 void loop() {
+
+  CouleurId couleurLue = identifierCouleur(lireCapteur());
+  if (couleurLue == couleurCandidate) {
+    if (lecturesCouleurStables < 3) lecturesCouleurStables++;
+  } else {
+    couleurCandidate = couleurLue;
+    lecturesCouleurStables = 1;
+  }
+
+  if (lecturesCouleurStables >= 3 && couleurCandidate != derniereCouleurAnnoncee) {
+    int nombreBips = 0;
+    switch (couleurCandidate) {
+      case ROSE:   nombreBips = 1; break;
+      case JAUNE:  nombreBips = 2; break;
+      case ORANGE: nombreBips = 3; break;
+      case BLEU:   nombreBips = 4; break;
+      case VERT:   nombreBips = 5; break;
+      default:     nombreBips = 0; break;
+    }
+
+    if (nombreBips > 0) beep(nombreBips);
+    derniereCouleurAnnoncee = couleurCandidate;
+  }
 
   bool Arr = ROBUS_IsBumper(3);
   if (Arr) {
