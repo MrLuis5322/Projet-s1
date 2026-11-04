@@ -3,6 +3,10 @@
 #include <Mouvement.h>
 
 
+void continuer(){
+    
+}
+
 void EtapeJaune () {
     // Séquence de mouvements pour éviter le mur hard coded
 delay(100);
