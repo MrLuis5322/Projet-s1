@@ -2,9 +2,34 @@
 #include <LibRobus.h>
 #include <Mouvement.h>
 #include <pince.h>
+#include <DetecteurSuiveurLigne.h>
 
-void continuer(){
-    
+
+void continuer() {
+
+    int cas = detecterPositionRobot();
+
+    if (cas == 2) avance(1);
+    while (cas == 2){
+        avanceMaj();
+        cas = detecterPositionRobot();
+        delay(10);
+    }
+    avancePlus();
+
+    while (cas == 0 || cas == 7 || cas == 4 || cas == 6){
+        tourneUneRoue(1, 1);
+        cas = detecterPositionRobot();
+        delay(10);
+    }
+    arret();
+
+    while (cas == 1 || cas == 3){
+        tourneUneRoue(-1, 1);
+        cas = detecterPositionRobot();
+        delay(10);
+    }
+    arret();
 }
 
 void EtapeJaune () {
@@ -58,8 +83,7 @@ void EtapeOrange () {
         delay(150);
         tourne(28);
         delay(150);
-    }     
-    pinceFermeture();   
+    }        
     tourne(-89); // tweak l'angle si le capteur voit pas la ligne
     delay(150);
     // move on - REPRISE DU CODE DU SUIVEUR DE LIGNE

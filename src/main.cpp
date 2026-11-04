@@ -16,8 +16,9 @@ Inclure les librairies de functions que vous voulez utiliser
 #include "Son.h"
 #include <EtapeCombattant.h>
 #include <traitement_couleur.h>
-#include <pince.h>
-#include <avr/interrupt.h>
+#include <DetecteurSuiveurLigne.h>
+
+
 /*
 Variables globales et defines
 */
@@ -33,8 +34,8 @@ int etatPast = 0;
 
 const int LED_ROSE = 22;
 const int LED_JAUNE = 24;
-const int LED_ORANGE = 26;
-const int LED_BLEU = 28;
+const int LED_ORANGE = 25;
+const int LED_BLEU = 33;
 // D30 est déjà utilisé comme direction moteur dans ArduinoX.
 // Déplacer la LED verte sur D32.
 const int LED_VERT = 32;
@@ -88,6 +89,7 @@ void setup(){
   TCCR1B = _BV(WGM12) | _BV(CS12) | _BV(CS10);
   OCR1A = 15624;
   initialiserDetecteurProximite();
+  initialiserSuiveurLigne();
   Serial.begin(115200);
   ENCODER_Reset(0);
   ENCODER_Reset(1);
@@ -95,7 +97,6 @@ void setup(){
   beep(1);
   initialiserSon();
   initialiserCapteurCouleur();
-  initialiserPince();
 
   // Les bumpers sont lus dans loop(); on commence sans mouvement.
   arret();
@@ -104,7 +105,7 @@ void setup(){
 void loop() {
 
   CouleurId couleurLue = identifierCouleur(lireCapteur());
-  if (couleurLue == couleurCandidate) {
+  if (couleurLue == couleurCandidate) { 
     if (lecturesCouleurStables < 3) lecturesCouleurStables++;
   } else {
     couleurCandidate = couleurLue;
@@ -144,6 +145,8 @@ void loop() {
     }
     derniereCouleurAnnoncee = couleurCandidate;
   }
+  continuer();
+  delay(10);
 
   bool Arr = ROBUS_IsBumper(3);
   if (Arr) {
