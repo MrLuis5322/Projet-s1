@@ -16,6 +16,8 @@ Inclure les librairies de functions que vous voulez utiliser
 #include "Son.h"
 #include <EtapeCombattant.h>
 #include <traitement_couleur.h>
+#include <pince.h>
+
 /*
 Variables globales et defines
 */
@@ -51,6 +53,7 @@ void setup(){
   beep(1);
   initialiserSon();
   initialiserCapteurCouleur();
+  initialiserPince();
 
   // Les bumpers sont lus dans loop(); on commence sans mouvement.
   arret();
