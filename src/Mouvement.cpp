@@ -19,18 +19,20 @@ static constexpr float CM_PAR_TICK_G = PI_APPROX * DIAMETRE_ROUE_CM / TICKS_PAR_
 static constexpr float CM_PAR_TICK_D = PI_APPROX * DIAMETRE_ROUE_CM / TICKS_PAR_TOUR_D;
 static constexpr float CIRCONFERENCE_TOURNER = PI_APPROX * ECART_ROUES_CM;
 
-// Vitesses de base calibrées (commande moteur Robus, generalement entre -1 et 1).
+// Vitesses de base calibrées. A TWEAK SI ON EST DÉSESPÉRÉ
 static constexpr float FACTEUR_VITESSE = 1.5f;
 static constexpr float VITESSE_GAUCHE = 0.40f * FACTEUR_VITESSE;
 static constexpr float VITESSE_DROITE = 0.40f * FACTEUR_VITESSE;
 static constexpr float VITESSE_GAUCHE_TOURNE = 0.40f;
 static constexpr float VITESSE_DROITE_TOURNE = 0.40f;
 
-// Reglages PID initiaux. Kp corrige l'erreur, Ki corrige un ecart persistant,
-// Kd amortit les changements rapides. Ces valeurs doivent etre calibrées sur le robot.
+// Reglages PID initiaux.       ON TWEAK EN PRIO POUR ALLER EN LIGNE DROITE
 static constexpr float KP = 0.0015f;
+//  Kp corrige l'erreur entre le roues en temps réel. Plus grand chiffre = plus grande compensation
 static constexpr float KI = 0.00008f;
+//  Ki corrige un ecart persistant entre les moteurs et le résultat attendu a cause de la friction par exemple. ''
 static constexpr float KD = 0.00015f;
+//  Kd amortit les changements rapides. pour pas overshoot la correction. ''
 
 static constexpr float CORRECTION_MAX = 0.22f;
 static constexpr float INTEGRALE_MAX = 1500.0f;
