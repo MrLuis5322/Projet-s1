@@ -33,11 +33,11 @@ int etatPast = 0;
 
 const int LED_ROSE = 22;
 const int LED_JAUNE = 24;
-const int LED_ORANGE = 26;
-const int LED_BLEU = 28;
+const int LED_ORANGE = 25;
+const int LED_BLEU = 27;
 // D30 est déjà utilisé comme direction moteur dans ArduinoX.
 // Déplacer la LED verte sur D32.
-const int LED_VERT = 32;
+const int LED_VERT = 29;
 const int LECTURES_COULEUR_REQUISES = 8;
 volatile int ledChronometree = -1;
 volatile uint8_t secondesLed = 0;
@@ -81,11 +81,11 @@ void setup(){
   pinMode(LED_ORANGE, OUTPUT);
   pinMode(LED_BLEU, OUTPUT);
   pinMode(LED_VERT, OUTPUT);
-  digitalWrite(LED_ROSE, LOW);
-  digitalWrite(LED_JAUNE, LOW);
-  digitalWrite(LED_ORANGE, LOW);
-  digitalWrite(LED_BLEU, LOW);
-  digitalWrite(LED_VERT, LOW);
+  digitalWrite(LED_ROSE, HIGH);
+  digitalWrite(LED_JAUNE, HIGH);
+  digitalWrite(LED_ORANGE, HIGH);
+  digitalWrite(LED_BLEU, HIGH);
+  digitalWrite(LED_VERT, HIGH);
   initialiserDetecteurProximite();
   Serial.begin(115200);
   ENCODER_Reset(0);
