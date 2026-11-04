@@ -19,10 +19,5 @@ void arret();
 void tourne(float angleDegres);
 void mouvementAvant(float DistanceCM);
 void annulerMouvement();
-void avanceMaj();
-void avancePlus();
-void tourneUneRoue(int direction, int vitesse);
-void continuer();
-void avance(int vitesse);
 
 #endif

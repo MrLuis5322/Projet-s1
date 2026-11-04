@@ -47,22 +47,23 @@ volatile uint16_t ticksLed = 0;
 // Timer3 overflow coupe la LED à 10 secondes même pendant une épreuve
 // bloquante. Le timer continue d'utiliser sa configuration PWM existante.
 ISR(TIMER3_OVF_vect) {
-  // Avec le PWM 8 bits Arduino (horloge / 64), un overflow dure 1,024 ms.
-  if (ledChronometree >= 0 && ++ticksLed >= 9766) {
+  // PWM phase-correct 8 bits : 510 x 64 / 16 MHz = 2,04 ms.
+  if (ledChronometree >= 0 && ++ticksLed >= 4902) {
     digitalWrite(ledChronometree, LOW);
     ledChronometree = -1;
-    TIMSK1 &= ~_BV(OCIE1A);
+    TIMSK3 &= ~_BV(TOIE3);
   }
 }
 
 void allumerLedDixSecondes(int pin) {
   noInterrupts();
+  if (ledChronometree >= 0) digitalWrite(ledChronometree, LOW);
   digitalWrite(pin, HIGH);
   ledChronometree = pin;
   ticksLed = 0;
-  TCNT1 = 0;
-  TIFR1 = _BV(OCF1A); // efface une interruption compare en attente
-  TIMSK1 |= _BV(OCIE1A);
+  TCNT3 = 0;
+  TIFR3 = _BV(TOV3);
+  TIMSK3 |= _BV(TOIE3);
   interrupts();
 }
 
@@ -87,10 +88,6 @@ void setup(){
   digitalWrite(LED_ORANGE, LOW);
   digitalWrite(LED_BLEU, LOW);
   digitalWrite(LED_VERT, LOW);
-  // Timer1 en mode CTC : une interruption par seconde (16 MHz / 1024).
-  TCCR1A = 0;
-  TCCR1B = _BV(WGM12) | _BV(CS12) | _BV(CS10);
-  OCR1A = 15624;
   initialiserDetecteurProximite();
   initialiserSuiveurLigne();
   Serial.begin(115200);

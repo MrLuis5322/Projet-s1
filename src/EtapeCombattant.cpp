@@ -6,30 +6,28 @@
 
 
 void continuer() {
-
     int cas = detecterPositionRobot();
-
-    if (cas == 2) avance(1);
-    while (cas == 2){
-        avanceMaj();
-        cas = detecterPositionRobot();
-        delay(10);
+    // Mise à jour non bloquante : laisse loop() vérifier les bumpers à chaque
+    // passage, tout en corrigeant la trajectoire selon les trois capteurs.
+    switch (cas) {
+      case 2: // ligne au centre
+        MOTOR_SetSpeed(LEFT, 0.35f);
+        MOTOR_SetSpeed(RIGHT, 0.35f);
+        break;
+      case 1: // ligne à droite
+      case 3:
+        MOTOR_SetSpeed(LEFT, 0.35f);
+        MOTOR_SetSpeed(RIGHT, 0.18f);
+        break;
+      case 4: // ligne à gauche
+      case 6:
+        MOTOR_SetSpeed(LEFT, 0.18f);
+        MOTOR_SetSpeed(RIGHT, 0.35f);
+        break;
+      default: // ligne perdue ou intersection : arrêt sûr
+        arret();
+        break;
     }
-    avancePlus();
-
-    while (cas == 0 || cas == 7 || cas == 4 || cas == 6){
-        tourneUneRoue(1, 1);
-        cas = detecterPositionRobot();
-        delay(10);
-    }
-    arret();
-
-    while (cas == 1 || cas == 3){
-        tourneUneRoue(-1, 1);
-        cas = detecterPositionRobot();
-        delay(10);
-    }
-    arret();
 }
 
 void EtapeJaune () {
