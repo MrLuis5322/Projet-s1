@@ -6,30 +6,27 @@
 
 
 void continuer() {
-
     int cas = detecterPositionRobot();
-
-    if (cas == 2) avance(1);
-    while (cas == 2){
-        avanceMaj();
-        cas = detecterPositionRobot();
-        delay(10);
+    // Update the motors once per loop so bumper checks remain responsive.
+    switch (cas) {
+      case 2: // line centered
+        MOTOR_SetSpeed(LEFT, 0.35f);
+        MOTOR_SetSpeed(RIGHT, 0.35f);
+        break;
+      case 1: // line to the right
+      case 3:
+        MOTOR_SetSpeed(LEFT, 0.35f);
+        MOTOR_SetSpeed(RIGHT, 0.18f);
+        break;
+      case 4: // line to the left
+      case 6:
+        MOTOR_SetSpeed(LEFT, 0.18f);
+        MOTOR_SetSpeed(RIGHT, 0.35f);
+        break;
+      default: // line lost or intersection
+        arret();
+        break;
     }
-    avancePlus();
-
-    while (cas == 0 || cas == 7 || cas == 4 || cas == 6){
-        tourneUneRoue(1, 1);
-        cas = detecterPositionRobot();
-        delay(10);
-    }
-    arret();
-
-    while (cas == 1 || cas == 3){
-        tourneUneRoue(-1, 1);
-        cas = detecterPositionRobot();
-        delay(10);
-    }
-    arret();
 }
 
 void EtapeJaune () {
