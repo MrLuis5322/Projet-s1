@@ -31,22 +31,23 @@ bool bumperArr; //3
 int etat = 0; // = 0=Arret 1=Avance 2=Droite 3=Gauche 4=Recule 
 int etatPast = 0;
 
-const int LED_ROSE = 22;
-const int LED_JAUNE = 24;
-const int LED_ORANGE = 25;
-const int LED_BLEU = 27;
-// D30 est déjà utilisé comme direction moteur dans ArduinoX.
-// Déplacer la LED verte sur D32.
-const int LED_VERT = 29;
+// D22-D25 sont réservées au sonar, D26-D29 aux bumpers,
+// D30-D31 aux moteurs, D34-D35 aux encodeurs et D36 au buzzer.
+// Les cinq LED utilisent des broches libres.
+const int LED_ROSE = 32;
+const int LED_JAUNE = 33;
+const int LED_ORANGE = 38;
+const int LED_BLEU = 39;
+const int LED_VERT = 40;
 const int LECTURES_COULEUR_REQUISES = 8;
 volatile int ledChronometree = -1;
-volatile uint8_t secondesLed = 0;
+volatile uint16_t ticksLed = 0;
 
 // Timer3 overflow coupe la LED à 10 secondes même pendant une épreuve
 // bloquante. Le timer continue d'utiliser sa configuration PWM existante.
 ISR(TIMER3_OVF_vect) {
   // Avec le PWM 8 bits Arduino (horloge / 64), un overflow dure 1,024 ms.
-  if (ledChronometree >= 0 && ++secondesLed >= 9766) {
+  if (ledChronometree >= 0 && ++ticksLed >= 9766) {
     digitalWrite(ledChronometree, LOW);
     ledChronometree = -1;
     TIMSK3 &= ~_BV(TOIE3);
@@ -57,7 +58,7 @@ void allumerLedDixSecondes(int pin) {
   noInterrupts();
   digitalWrite(pin, HIGH);
   ledChronometree = pin;
-  secondesLed = 0;
+  ticksLed = 0;
   // Reset the PWM timer so the 10-second interval starts at this point.
   TCNT3 = 0;
   TIFR3 = _BV(TOV3); // efface un overflow en attente
@@ -81,11 +82,12 @@ void setup(){
   pinMode(LED_ORANGE, OUTPUT);
   pinMode(LED_BLEU, OUTPUT);
   pinMode(LED_VERT, OUTPUT);
-  digitalWrite(LED_ROSE, HIGH);
-  digitalWrite(LED_JAUNE, HIGH);
-  digitalWrite(LED_ORANGE, HIGH);
-  digitalWrite(LED_BLEU, HIGH);
-  digitalWrite(LED_VERT, HIGH);
+  // LED classiques câblées entre la broche et GND : LOW = éteinte.
+  digitalWrite(LED_ROSE, LOW);
+  digitalWrite(LED_JAUNE, LOW);
+  digitalWrite(LED_ORANGE, LOW);
+  digitalWrite(LED_BLEU, LOW);
+  digitalWrite(LED_VERT, LOW);
   initialiserDetecteurProximite();
   Serial.begin(115200);
   ENCODER_Reset(0);
@@ -104,7 +106,8 @@ void loop() {
 
   CouleurId couleurLue = identifierCouleur(lireCapteur());
   if (couleurLue == couleurCandidate) {
-    if (lecturesCouleurStables < 3) lecturesCouleurStables++;
+    if (lecturesCouleurStables < LECTURES_COULEUR_REQUISES)
+      lecturesCouleurStables++;
   } else {
     couleurCandidate = couleurLue;
     lecturesCouleurStables = 1;
