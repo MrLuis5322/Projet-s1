@@ -16,8 +16,9 @@ Inclure les librairies de functions que vous voulez utiliser
 #include "Son.h"
 #include <EtapeCombattant.h>
 #include <traitement_couleur.h>
-#include <pince.h>
-#include <avr/interrupt.h>
+#include <DetecteurSuiveurLigne.h>
+
+
 /*
 Variables globales et defines
 */
@@ -37,20 +38,20 @@ int etatPast = 0;
 const int LED_ROSE = 32;
 const int LED_JAUNE = 33;
 const int LED_ORANGE = 38;
-const int LED_BLEU = 44; //fonctionne pas
-const int LED_VERT = 46; //fonctionne pas
+const int LED_BLEU = 39;
+const int LED_VERT = 40;
 const int LECTURES_COULEUR_REQUISES = 8;
 volatile int ledChronometree = -1;
-volatile uint16_t ticksLed = 0;
+volatile uint8_t secondesLed = 0;
 
 // Timer3 overflow coupe la LED à 10 secondes même pendant une épreuve
 // bloquante. Le timer continue d'utiliser sa configuration PWM existante.
 ISR(TIMER3_OVF_vect) {
   // Avec le PWM 8 bits Arduino (horloge / 64), un overflow dure 1,024 ms.
-  if (ledChronometree >= 0 && ++ticksLed >= 4900) {
+  if (ledChronometree >= 0 && ++ticksLed >= 9766) {
     digitalWrite(ledChronometree, LOW);
     ledChronometree = -1;
-    TIMSK3 &= ~_BV(TOIE3);
+    TIMSK1 &= ~_BV(OCIE1A);
   }
 }
 
@@ -58,11 +59,10 @@ void allumerLedDixSecondes(int pin) {
   noInterrupts();
   digitalWrite(pin, HIGH);
   ledChronometree = pin;
-  ticksLed = 0;
-  // Reset the PWM timer so the 10-second interval starts at this point.
-  TCNT3 = 0;
-  TIFR3 = _BV(TOV3); // efface un overflow en attente
-  TIMSK3 |= _BV(TOIE3);
+  secondesLed = 0;
+  TCNT1 = 0;
+  TIFR1 = _BV(OCF1A); // efface une interruption compare en attente
+  TIMSK1 |= _BV(OCIE1A);
   interrupts();
 }
 
@@ -82,13 +82,17 @@ void setup(){
   pinMode(LED_ORANGE, OUTPUT);
   pinMode(LED_BLEU, OUTPUT);
   pinMode(LED_VERT, OUTPUT);
-  // LED classiques câblées entre la broche et GND : LOW = éteinte.
   digitalWrite(LED_ROSE, LOW);
   digitalWrite(LED_JAUNE, LOW);
   digitalWrite(LED_ORANGE, LOW);
   digitalWrite(LED_BLEU, LOW);
   digitalWrite(LED_VERT, LOW);
+  // Timer1 en mode CTC : une interruption par seconde (16 MHz / 1024).
+  TCCR1A = 0;
+  TCCR1B = _BV(WGM12) | _BV(CS12) | _BV(CS10);
+  OCR1A = 15624;
   initialiserDetecteurProximite();
+  initialiserSuiveurLigne();
   Serial.begin(115200);
   ENCODER_Reset(0);
   ENCODER_Reset(1);
@@ -96,7 +100,6 @@ void setup(){
   beep(1);
   initialiserSon();
   initialiserCapteurCouleur();
-  initialiserPince();
 
   // Les bumpers sont lus dans loop(); on commence sans mouvement.
   arret();
@@ -105,9 +108,8 @@ void setup(){
 void loop() {
 
   CouleurId couleurLue = identifierCouleur(lireCapteur());
-  if (couleurLue == couleurCandidate) {
-    if (lecturesCouleurStables < LECTURES_COULEUR_REQUISES)
-      lecturesCouleurStables++;
+  if (couleurLue == couleurCandidate) { 
+    if (lecturesCouleurStables < 3) lecturesCouleurStables++;
   } else {
     couleurCandidate = couleurLue;
     lecturesCouleurStables = 1;
@@ -146,6 +148,8 @@ void loop() {
     }
     derniereCouleurAnnoncee = couleurCandidate;
   }
+  continuer();
+  delay(10);
 
   bool Arr = ROBUS_IsBumper(3);
   if (Arr) {
