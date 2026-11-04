@@ -3,6 +3,19 @@ Projet: Main - P13
 Auteurs: Alexandre H., Luis
 Description: Code pour sortie du labyrinthe
 Date : 01/10/2026
+
+
+Rose | R: 60.00 a 61.00 (moy 60.41) | G: 20.00 a 21.00 (moy 20.97) | B: 35.00 a 35.00 (moy 35.00)
+Place le capteur sur : Jaune
+Jaune | R: 74.00 a 75.00 (moy 74.45) | G: 50.00 a 51.00 (moy 50.21) | B: 24.00 a 24.00 (moy 24.00)
+Place le capteur sur : Orange
+Orange | R: 56.00 a 57.00 (moy 56.97) | G: 12.00 a 13.00 (moy 12.97) | B: 9.00 a 9.00 (moy 9.00)
+Place le capteur sur : Bleu
+Bleu | R: 8.00 a 8.00 (moy 8.00) | G: 26.00 a 27.00 (moy 26.10) | B: 50.00 a 51.00 (moy 50.34)
+Place le capteur sur : Vert
+Vert | R: 6.00 a 6.00 (moy 6.00) | G: 13.00 a 13.00 (moy 13.00) | B: 5.00 a 6.00 (moy 5.03)
+
+
 */
 
 /*
@@ -66,7 +79,7 @@ void loop() {
     lecturesCouleurStables = 1;
   }
 
-  if (lecturesCouleurStables >= 3 && couleurCandidate != derniereCouleurAnnoncee) {
+  if (lecturesCouleurStables >= 8 && couleurCandidate != derniereCouleurAnnoncee) {
     int nombreBips = 0;
     switch (couleurCandidate) {
       case ROSE:   nombreBips = 1; break;
