@@ -159,18 +159,16 @@ void mouvementAvant(float distanceCM) {
 
     arret();
 }
+/*
+void tourne(int p_sens, float p_vitesse) {
 
+}
 
+void tournePlus(){
 
+}
 
-
-
-
-
-
-
-
-
+*/
 
 // Tourne sur place : angle positif vers la droite, negatif vers la gauche.
 // Le PID compare les distances parcourues en valeur absolue pour synchroniser
