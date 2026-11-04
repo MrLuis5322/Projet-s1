@@ -86,14 +86,26 @@ Couleur moyenneCouleur() {
 // ---------------------------------------------------------------
 
 CouleurId identifierCouleur(Couleur m) {
-  // ---------------------------------------------------------
-  // SEUILS (à remplir selon les mesures réelles)
-  // if (...>m.R > ... && ...<m.G < ... && ...<m.B < ...) return ROSE;
-  // if (...>m.R > ... && ...>m.G > ... && ...<m.B < ...) return JAUNE;
-  // if (...>m.R > ... && ...>m.G > ... && ...<m.B < ...) return ORANGE;
-  // if (...>m.B > ... && ...<m.R < ... && ...<m.G < ...) return BLEU;
-  // if (...>m.G > ... && ...<m.R < ... && ...<m.B < ...) return VERT;
-  // ---------------------------------------------------------
+  // Seuils provisoires pour les valeurs brutes du TCS34725.
+  // Ils servent de point de départ seulement : la lumière et la distance
+  // changent beaucoup les lectures. Remplacer ces seuils après calibration.
+  // Le canal dominant est comparé aux autres pour rester un peu tolérant.
+  if (m.R > 1.25f * m.B && m.R > 1.05f * m.G && m.B > 0.45f * m.R)
+    return ROSE;
+
+  if (m.R > 1.15f * m.B && m.G > 1.15f * m.B &&
+      m.R > 0.65f * m.G && m.G > 0.65f * m.R)
+    return JAUNE;
+
+  if (m.R > 1.45f * m.G && m.R > 1.8f * m.B && m.G > 0.8f * m.B)
+    return ORANGE;
+
+  if (m.B > 1.25f * m.R && m.B > 1.15f * m.G)
+    return BLEU;
+
+  if (m.G > 1.2f * m.R && m.G > 1.15f * m.B)
+    return VERT;
+
   return AUCUN;
 }
 
