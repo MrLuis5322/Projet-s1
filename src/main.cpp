@@ -62,15 +62,6 @@ const int LECTURES_COULEUR_REQUISES = 4;
 volatile uint8_t ledChronometree = AUCUNE_LED;
 volatile uint16_t ticksRestantsDEL = 0;
 
-int ledChronometree = -1;
-unsigned long debutLed = 0;
-
-const uint8_t AUCUNE_LED = 0xFF;
-const uint16_t DUREE_DEL_TICKS = 9766;
-const int LECTURES_COULEUR_REQUISES = 8;
-volatile uint8_t ledChronometree = AUCUNE_LED;
-volatile uint16_t ticksRestantsDEL = 0;
-
 ISR(TIMER0_COMPA_vect) {
   if (ticksRestantsDEL > 0 && --ticksRestantsDEL == 0) {
     digitalWrite(ledChronometree, LOW);
