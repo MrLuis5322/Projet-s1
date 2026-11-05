@@ -86,26 +86,14 @@ Couleur moyenneCouleur() {
 // ---------------------------------------------------------------
 
 CouleurId identifierCouleur(Couleur m) {
-  // Seuils provisoires pour les valeurs brutes du TCS34725.
-  // Ils servent de point de départ seulement : la lumière et la distance
-  // changent beaucoup les lectures. Remplacer ces seuils après calibration.
-  // Le canal dominant est comparé aux autres pour rester un peu tolérant.
-  if (m.R > 1.25f * m.B && m.R > 1.05f * m.G && m.B > 0.45f * m.R)
-    return ROSE;
-
-  if (m.R > 1.15f * m.B && m.G > 1.15f * m.B &&
-      m.R > 0.65f * m.G && m.G > 0.65f * m.R)
-    return JAUNE;
-
-  if (m.R > 1.45f * m.G && m.R > 1.8f * m.B && m.G > 0.8f * m.B)
-    return ORANGE;
-
-  if (m.B > 1.25f * m.R && m.B > 1.15f * m.G)
-    return BLEU;
-
-  if (m.G > 1.2f * m.R && m.G > 1.15f * m.B)
-    return VERT;
-
+  // ---------------------------------------------------------
+  // SEUILS (à remplir selon les mesures réelles)
+   if (369<m.R && m.R<469 && 29<m.G && m.G<378 && 265<m.B && m.B<332) return ORANGE;
+   if (340<m.R && m.R<413 && 422<m.G && m.G<517 && 228<m.B && m.B<279) return JAUNE;
+   if (312<m.R && m.R<409 && 288<m.G && m.G<384 && 181<m.B && m.B<233) return ROSE;
+   if (156<m.B && m.B<184 && 309<m.R && m.R<364 && 313<m.G && m.G<369) return BLEU;
+   if (257<m.G && m.G<298 && 405<m.R && m.R<481 && 334<m.B && m.B<391) return VERT;
+  // ---------------------------------------------------------
   return AUCUN;
 }
 

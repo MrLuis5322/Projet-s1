@@ -29,6 +29,9 @@ Inclure les librairies de functions que vous voulez utiliser
 #include "Son.h"
 #include <EtapeCombattant.h>
 #include <traitement_couleur.h>
+#include <DetecteurSuiveurLigne.h>
+
+
 /*
 Variables globales et defines
 */
@@ -42,6 +45,31 @@ bool bumperArr; //3
 int etat = 0; // = 0=Arret 1=Avance 2=Droite 3=Gauche 4=Recule 
 int etatPast = 0;
 
+// D22-D25 sont réservées au sonar, D26-D29 aux bumpers,
+// D30-D31 aux moteurs, D34-D35 aux encodeurs et D36 au buzzer.
+// Les cinq LED utilisent des broches libres.
+const int LED_ROSE = 32;
+const int LED_JAUNE = 33;
+const int LED_ORANGE = 38;
+const int LED_BLEU = 39;
+const int LED_VERT = 40;
+const int LECTURES_COULEUR_REQUISES = 8;
+int ledChronometree = -1;
+unsigned long debutLed = 0;
+
+void actualiserLed() {
+  if (ledChronometree >= 0 && millis() - debutLed >= 10000UL) {
+    digitalWrite(ledChronometree, LOW);
+    ledChronometree = -1;
+  }
+}
+
+void allumerLedDixSecondes(int pin) {
+  if (ledChronometree >= 0) digitalWrite(ledChronometree, LOW);
+  digitalWrite(pin, HIGH);
+  ledChronometree = pin;
+  debutLed = millis();
+}
 // Confirmation des lectures pour eviter plusieurs sequences de bips
 // lorsque le capteur oscille entre deux couleurs.
 CouleurId couleurCandidate = AUCUN;
@@ -51,12 +79,20 @@ int lecturesCouleurStables = 0;
 /*
 Fonctions d'initialisation (setup)
 */
-
-
-
 void setup(){
   BoardInit();
+  pinMode(LED_ROSE, OUTPUT);
+  pinMode(LED_JAUNE, OUTPUT);
+  pinMode(LED_ORANGE, OUTPUT);
+  pinMode(LED_BLEU, OUTPUT);
+  pinMode(LED_VERT, OUTPUT);
+  digitalWrite(LED_ROSE, LOW);
+  digitalWrite(LED_JAUNE, LOW);
+  digitalWrite(LED_ORANGE, LOW);
+  digitalWrite(LED_BLEU, LOW);
+  digitalWrite(LED_VERT, LOW);
   initialiserDetecteurProximite();
+  initialiserSuiveurLigne();
   Serial.begin(115200);
   ENCODER_Reset(0);
   ENCODER_Reset(1);
@@ -69,37 +105,70 @@ void setup(){
   arret();
 }
 
-void loop() {
-
+void traiterCouleurDuParcours() {
   CouleurId couleurLue = identifierCouleur(lireCapteur());
-  if (couleurLue == couleurCandidate) {
-    if (lecturesCouleurStables < 3) lecturesCouleurStables++;
+  if (couleurLue == couleurCandidate) { 
+    if (lecturesCouleurStables < LECTURES_COULEUR_REQUISES) lecturesCouleurStables++;
   } else {
     couleurCandidate = couleurLue;
     lecturesCouleurStables = 1;
   }
 
-  if (lecturesCouleurStables >= 8 && couleurCandidate != derniereCouleurAnnoncee) {
-    int nombreBips = 0;
-    switch (couleurCandidate) {
-      case ROSE:   nombreBips = 1; break;
-      case JAUNE:  nombreBips = 2; break;
-      case ORANGE: nombreBips = 3; break;
-      case BLEU:   nombreBips = 4; break;
-      case VERT:   nombreBips = 5; break;
-      default:     nombreBips = 0; break;
-    }
-
-    if (nombreBips > 0) beep(nombreBips);
-    derniereCouleurAnnoncee = couleurCandidate;
+  if (lecturesCouleurStables >= LECTURES_COULEUR_REQUISES &&
+      couleurCandidate == AUCUN) {
+    derniereCouleurAnnoncee = AUCUN;
   }
 
-  bool Arr = ROBUS_IsBumper(3);
-  if (Arr) {
-    delay(500);
-    mouvementAvant(150.0f);
-    arret();
+  if (lecturesCouleurStables >= LECTURES_COULEUR_REQUISES &&
+      couleurCandidate != AUCUN && couleurCandidate != derniereCouleurAnnoncee) {
+    int nombreBips = 0;
+    int led = -1;
+    switch (couleurCandidate) {
+      case ROSE:   nombreBips = 1; led = LED_ROSE; break;
+      case JAUNE:  nombreBips = 2; led = LED_JAUNE; break;
+      case ORANGE: nombreBips = 3; led = LED_ORANGE; break;
+      case BLEU:   nombreBips = 4; led = LED_BLEU; break;
+      case VERT:   nombreBips = 5; led = LED_VERT; break;
+      default: break;
     }
+
+    if (nombreBips > 0) {
+      arret();
+      allumerLedDixSecondes(led);
+      beep(nombreBips);
+      switch (couleurCandidate) {
+        case ROSE:   EtapeRouge(); break; 
+        case JAUNE:  EtapeJaune(); break;
+        case ORANGE: EtapeOrange(); break;
+        case BLEU:   EtapeBleu(); break;
+        case VERT:   EtapeVert(); break;
+        default: break;
+      }
+
+    }
+    derniereCouleurAnnoncee = couleurCandidate;
+  }
+}
+
+void loop() {
+  actualiserLed();
+  static bool arrierePrecedent = false;
+  static bool parcoursActif = false;
+  const bool arriere = ROBUS_IsBumper(3);
+  const bool relache = arrierePrecedent && !arriere;
+  arrierePrecedent = arriere;
+
+  if (!parcoursActif && relache && ligneCentree()) {
+    reinitialiserSuiveurLigne();
+    parcoursActif = true;
+  }
+
+  if (parcoursActif) {
+    traiterCouleurDuParcours();
+    actualiserLed();
+    suivreLigne();
+    return;
+  }
 
   bool Gauche = ROBUS_IsBumper(0);
   if (Gauche) {

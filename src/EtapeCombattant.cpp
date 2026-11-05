@@ -1,7 +1,36 @@
 #include <math.h>
 #include <LibRobus.h>
 #include <Mouvement.h>
+#include <pince.h>
+#include <DetecteurSuiveurLigne.h>
 
+
+void continuer() {
+
+    int cas = detecterPositionRobot();
+
+    if (cas == 2) avance(1);
+    while (cas == 2){
+        avanceMaj();
+        cas = detecterPositionRobot();
+        delay(10);
+    }
+    avancePlus();
+
+    while (cas == 0 || cas == 7 || cas == 4 || cas == 6){
+        tourneUneRoue(1, 1);
+        cas = detecterPositionRobot();
+        delay(10);
+    }
+    arret();
+
+    while (cas == 1 || cas == 3){
+        tourneUneRoue(-1, 1);
+        cas = detecterPositionRobot();
+        delay(10);
+    }
+    arret();
+}
 
 void EtapeJaune () {
     // Séquence de mouvements pour éviter le mur hard coded
@@ -41,7 +70,6 @@ void EtapeRouge () {
     // move on - REPRISE DU CODE DU SUIVEUR DE LIGNE
 
     }
-// A MODIFIER 
 void EtapeOrange () {
     // Se déplace jusqu'au bout du cercle et fait le tour, il devrait théoriquement avoir
     // le verre dans sa pince donc il faut attraper a la fin, mais je n'ai pas la fonction pince

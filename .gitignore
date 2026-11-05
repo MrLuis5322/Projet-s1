@@ -10,3 +10,9 @@
 .vscode/c_cpp_properties.json
 .vscode/c_cpp_properties.json
 .vscode/
+# Fichiers générés localement
+.pio/
+.venv/
+.DS_Store
+**/.DS_Store
+
