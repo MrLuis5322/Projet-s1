@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <LibRobus.h>
+#include <Mouvement.h>
 #include <DetecteurSuiveurLigne.h>
 
 namespace {
@@ -18,6 +19,7 @@ const float VITESSE_INTERIEURE = 0.12f;
 const float VITESSE_EXTERIEURE = 0.27f;
 enum Direction { TOUT_DROIT, GAUCHE, DROITE };
 Direction dernierVirage = TOUT_DROIT;
+bool bandeEpaisseTraitee = false;
 
 void rouler(float vitesseGauche, float vitesseDroite) {
   MOTOR_SetSpeed(LEFT, vitesseGauche);
@@ -28,6 +30,7 @@ void rouler(float vitesseGauche, float vitesseDroite) {
 
 void reinitialiserSuiveurLigne() {
   dernierVirage = TOUT_DROIT;
+  bandeEpaisseTraitee = false;
 }
 
 void initialiserSuiveurLigne() {
@@ -49,6 +52,10 @@ bool ligneCentree() {
 
 void suivreLigne() {
   const int position = detecterPositionRobot();
+  if (position != 7) {
+    bandeEpaisseTraitee = false;
+  }
+
   switch (position) {
     case 0: {
       // Seul le motif sans capteur actif signifie que la ligne est perdue.
@@ -78,13 +85,20 @@ void suivreLigne() {
       rouler(VITESSE_INTERIEURE, VITESSE_EXTERIEURE);
       break;
     case 5:
-    case 7:
-      // Deux bords ou toute la rangée sur la ligne : traverser droit.
+      // Deux capteurs voient la ligne : traverser droit.
       rouler(VITESSE_AVANCE, VITESSE_AVANCE);
       break;
     case 6:
       dernierVirage = GAUCHE;
       rouler(0.17f, 0.24f);
+      break;
+    case 7:
+      if (!bandeEpaisseTraitee) {
+        bandeEpaisseTraitee = true;
+        mouvementAvant(85.0f);
+      } else {
+        rouler(VITESSE_AVANCE, VITESSE_AVANCE);
+      }
       break;
   }
 }
