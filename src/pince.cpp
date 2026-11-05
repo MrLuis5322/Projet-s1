@@ -1,18 +1,19 @@
+#include <LibRobus.h>
 #include <pince.h>
 
-
-//initialisation du servo de la pince
-void initialiserPince() {
-    pince.attach(pinServo);
-    pince.write(angleOuverture); // Position initiale de la pince (ouverte)
+namespace {
+const uint8_t ANGLE_OUVERTURE = 0;
+const uint8_t ANGLE_FERMETURE = 90;
 }
 
+void initialiserPince() {
+    SERVO_SetAngle(SERVO_1, ANGLE_OUVERTURE);
+}
 
-//mouvement d'ouverture/fermeture de la pince
 void pinceOuverture() {
-    pince.write(angleOuverture);
+    SERVO_SetAngle(SERVO_1, ANGLE_OUVERTURE);
 }
 
 void pinceFermeture() {
-    pince.write(angleFermeture);
+    SERVO_SetAngle(SERVO_1, ANGLE_FERMETURE);
 }

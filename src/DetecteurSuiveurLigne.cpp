@@ -19,20 +19,7 @@ const float VITESSE_EXTERIEURE = 0.27f;
 enum Direction { TOUT_DROIT, GAUCHE, DROITE };
 Direction dernierVirage = TOUT_DROIT;
 
-void rouler(Direction direction, bool lentement) {
-  float vitesseGauche = lentement ? 0.16f : VITESSE_AVANCE;
-  float vitesseDroite = vitesseGauche;
-
-  if (direction == GAUCHE) {
-    // Pour tourner à gauche, la roue gauche tourne moins vite.
-    vitesseGauche = lentement ? 0.08f : VITESSE_INTERIEURE;
-    vitesseDroite = lentement ? 0.19f : VITESSE_EXTERIEURE;
-  } else if (direction == DROITE) {
-    // Pour tourner à droite, la roue droite tourne moins vite.
-    vitesseGauche = lentement ? 0.19f : VITESSE_EXTERIEURE;
-    vitesseDroite = lentement ? 0.08f : VITESSE_INTERIEURE;
-  }
-
+void rouler(float vitesseGauche, float vitesseDroite) {
   MOTOR_SetSpeed(LEFT, vitesseGauche);
   MOTOR_SetSpeed(RIGHT, vitesseDroite);
 }
@@ -57,35 +44,47 @@ int detecterPositionRobot() {
 }
 
 bool ligneCentree() {
-  return detecterPositionRobot() == 2;
+  return (detecterPositionRobot() & 2) != 0;
 }
 
 void suivreLigne() {
   const int position = detecterPositionRobot();
-  const bool gauche = position & 4;
-  const bool centre = position & 2;
-  const bool droite = position & 1;
-  int nombreActifs = int(gauche) + int(centre) + int(droite);
+  switch (position) {
+    case 0: {
+      // Seul le motif sans capteur actif signifie que la ligne est perdue.
+      Direction recherche = dernierVirage;
+      if (recherche == TOUT_DROIT) recherche = GAUCHE;
 
-  if (nombreActifs == 1) {
-    if (gauche) {
-      dernierVirage = GAUCHE;
-      rouler(GAUCHE, false);
-    } else if (droite) {
+      if (recherche == GAUCHE) {
+        rouler(0.08f, 0.19f);
+      } else {
+        rouler(0.19f, 0.08f);
+      }
+      break;
+    }
+    case 1:
       dernierVirage = DROITE;
-      rouler(DROITE, false);
-    } else {
-      rouler(TOUT_DROIT, false);
-    }
-  } else {
-    // Aucun capteur ou plusieurs capteurs actifs :
-    // chercher lentement du côté du dernier virage.
-    Direction recherche = dernierVirage;
-
-    if (recherche == TOUT_DROIT) {
-      recherche = GAUCHE;  // Aucun virage mémorisé : essayer à gauche.
-    }
-
-    rouler(recherche, true);
+      rouler(VITESSE_EXTERIEURE, VITESSE_INTERIEURE);
+      break;
+    case 2:
+      rouler(VITESSE_AVANCE, VITESSE_AVANCE);
+      break;
+    case 3:
+      dernierVirage = DROITE;
+      rouler(0.24f, 0.17f);
+      break;
+    case 4:
+      dernierVirage = GAUCHE;
+      rouler(VITESSE_INTERIEURE, VITESSE_EXTERIEURE);
+      break;
+    case 5:
+    case 7:
+      // Deux bords ou toute la rangée sur la ligne : traverser droit.
+      rouler(VITESSE_AVANCE, VITESSE_AVANCE);
+      break;
+    case 6:
+      dernierVirage = GAUCHE;
+      rouler(0.17f, 0.24f);
+      break;
   }
 }
