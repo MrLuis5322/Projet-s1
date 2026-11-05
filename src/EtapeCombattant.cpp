@@ -3,6 +3,7 @@
 #include <Mouvement.h>
 #include <pince.h>
 #include <DetecteurSuiveurLigne.h>
+#include <Son.h>
 
 
 void continuer() {
@@ -90,8 +91,17 @@ void EtapeOrange () {
 }
 
 void EtapeBleu () {
-arret();
-// Attendre message IR
+    const uint32_t CODE_REVEIL = 0x08F740BFUL;
+    arret();
+
+    while (true) {
+        const uint32_t message = REMOTE_read();
+        if (message == CODE_REVEIL) {
+            beep(3);
+            return;
+        }
+        delay(10);
+    }
 }
 
 void EtapeVert () {

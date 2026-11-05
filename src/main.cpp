@@ -97,7 +97,6 @@ void setup(){
   ENCODER_Reset(0);
   ENCODER_Reset(1);
   delay(1000);
-  beep(1);
   initialiserSon();
   initialiserCapteurCouleur();
 
@@ -165,7 +164,6 @@ void loop() {
       return;
     }
     if (message != CODE_DEMARRAGE) {
-      beep(1); // Message reçu, mais le robot reste en attente.
       return;
     }
 
@@ -198,4 +196,3 @@ void loop() {
       EtapeRouge();
     }
 }
-
