@@ -7,4 +7,6 @@ void pinceOuverture();
 
 void pinceFermeture();
 
+void prendreVerre();
+
 #endif

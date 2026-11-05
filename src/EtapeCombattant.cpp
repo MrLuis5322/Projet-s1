@@ -72,22 +72,7 @@ void EtapeRouge () {
 
     }
 void EtapeOrange () {
-    // Se déplace jusqu'au bout du cercle et fait le tour, il devrait théoriquement avoir
-    // le verre dans sa pince donc il faut attraper a la fin, mais je n'ai pas la fonction pince
-   mouvementAvant(18);
-    delay(250);
-    tourne(90);
-    delay(150);
-    
-    for (int i = 0; i < 12; ++i) {
-        mouvementAvant(11.388);
-        delay(150);
-        tourne(28);
-        delay(150);
-    }        
-    tourne(-89); // tweak l'angle si le capteur voit pas la ligne
-    delay(150);
-    // move on - REPRISE DU CODE DU SUIVEUR DE LIGNE
+    prendreVerre();
 }
 
 void EtapeBleu () {

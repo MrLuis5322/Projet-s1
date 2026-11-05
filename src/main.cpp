@@ -30,6 +30,9 @@ Inclure les librairies de functions que vous voulez utiliser
 #include <EtapeCombattant.h>
 #include <traitement_couleur.h>
 #include <DetecteurSuiveurLigne.h>
+#include <pince.h>
+#include <avr/interrupt.h>
+#include <util/atomic.h>
 
 
 /*
@@ -53,22 +56,28 @@ const int LED_JAUNE = 33;
 const int LED_ORANGE = 38;
 const int LED_BLEU = 39;
 const int LED_VERT = 40;
+const uint8_t AUCUNE_LED = 0xFF;
+const uint16_t DUREE_DEL_TICKS = 9766;
 const int LECTURES_COULEUR_REQUISES = 8;
-int ledChronometree = -1;
-unsigned long debutLed = 0;
+volatile uint8_t ledChronometree = AUCUNE_LED;
+volatile uint16_t ticksRestantsDEL = 0;
 
-void actualiserLed() {
-  if (ledChronometree >= 0 && millis() - debutLed >= 10000UL) {
+ISR(TIMER0_COMPA_vect) {
+  if (ticksRestantsDEL > 0 && --ticksRestantsDEL == 0) {
     digitalWrite(ledChronometree, LOW);
-    ledChronometree = -1;
+    ledChronometree = AUCUNE_LED;
   }
 }
 
 void allumerLedDixSecondes(int pin) {
-  if (ledChronometree >= 0) digitalWrite(ledChronometree, LOW);
-  digitalWrite(pin, HIGH);
-  ledChronometree = pin;
-  debutLed = millis();
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+    if (ledChronometree != AUCUNE_LED) {
+      digitalWrite(ledChronometree, LOW);
+    }
+    ledChronometree = pin;
+    ticksRestantsDEL = DUREE_DEL_TICKS;
+    digitalWrite(ledChronometree, HIGH);
+  }
 }
 // Confirmation des lectures pour eviter plusieurs sequences de bips
 // lorsque le capteur oscille entre deux couleurs.
@@ -91,12 +100,17 @@ void setup(){
   digitalWrite(LED_ORANGE, LOW);
   digitalWrite(LED_BLEU, LOW);
   digitalWrite(LED_VERT, LOW);
+  // Timer0 compare A runs every 1.024 ms, independently of blocking routines.
+  OCR0A = 128;
+  TIFR0 = _BV(OCF0A);
+  TIMSK0 |= _BV(OCIE0A);
   initialiserDetecteurProximite();
   initialiserSuiveurLigne();
   Serial.begin(115200);
   ENCODER_Reset(0);
   ENCODER_Reset(1);
   delay(1000);
+  initialiserPince();
   initialiserSon();
   initialiserCapteurCouleur();
 
@@ -150,7 +164,6 @@ void traiterCouleurDuParcours() {
 }
 
 void loop() {
-  actualiserLed();
   static bool parcoursActif = false;
   const uint32_t CODE_DEMARRAGE = 0x08F7807FUL;
 
@@ -174,7 +187,6 @@ void loop() {
 
   if (parcoursActif) {
     traiterCouleurDuParcours();
-    actualiserLed();
     suivreLigne();
     return;
   }
