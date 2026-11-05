@@ -86,6 +86,7 @@ Couleur moyenneCouleur() {
 // ---------------------------------------------------------------
 
 CouleurId identifierCouleur(Couleur m) {
+<<<<<<< HEAD
   // ---------------------------------------------------------
   // SEUILS (à remplir selon les mesures réelles)
    if (196<m.R && m.R<211 && 161<m.G && m.G<173 && 142<m.B && m.B<153) return ROSE;
@@ -94,6 +95,28 @@ CouleurId identifierCouleur(Couleur m) {
    if (80<m.B && m.B<93 && 131<m.R && m.R<156 && 126<m.G && m.G<152) return BLEU;
    if (109<m.G && m.G<121 && 162<m.R && m.R<177 && 137<m.B && m.B<150) return VERT;
   // ---------------------------------------------------------
+=======
+  // Seuils provisoires pour les valeurs brutes du TCS34725.
+  // Ils servent de point de départ seulement : la lumière et la distance
+  // changent beaucoup les lectures. Remplacer ces seuils après calibration.
+  // Le canal dominant est comparé aux autres pour rester un peu tolérant.
+  if (m.R > 1.25f * m.B && m.R > 1.05f * m.G && m.B > 0.45f * m.R)
+    return ROSE;
+
+  if (m.R > 1.15f * m.B && m.G > 1.15f * m.B &&
+      m.R > 0.65f * m.G && m.G > 0.65f * m.R)
+    return JAUNE;
+
+  if (m.R > 1.45f * m.G && m.R > 1.8f * m.B && m.G > 0.8f * m.B)
+    return ORANGE;
+
+  if (m.B > 1.25f * m.R && m.B > 1.15f * m.G)
+    return BLEU;
+
+  if (m.G > 1.2f * m.R && m.G > 1.15f * m.B)
+    return VERT;
+
+>>>>>>> parent of 6c679b3 (Merge branch 'CodeTeam1' into Codelevraicode)
   return AUCUN;
 }
 

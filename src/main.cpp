@@ -16,9 +16,8 @@ Inclure les librairies de functions que vous voulez utiliser
 #include "Son.h"
 #include <EtapeCombattant.h>
 #include <traitement_couleur.h>
-#include <DetecteurSuiveurLigne.h>
-
-
+#include <pince.h>
+#include <avr/interrupt.h>
 /*
 Variables globales et defines
 */
@@ -47,8 +46,13 @@ volatile uint16_t ticksLed = 0;
 // Timer3 overflow coupe la LED à 10 secondes même pendant une épreuve
 // bloquante. Le timer continue d'utiliser sa configuration PWM existante.
 ISR(TIMER3_OVF_vect) {
+<<<<<<< HEAD
   // PWM phase-correct 8 bits : 510 x 64 / 16 MHz = 2,04 ms.
   if (ledChronometree >= 0 && ++ticksLed >= 4902) {
+=======
+  // Avec le PWM 8 bits Arduino (horloge / 64), un overflow dure 1,024 ms.
+  if (ledChronometree >= 0 && ++ticksLed >= 9766) {
+>>>>>>> parent of 6c679b3 (Merge branch 'CodeTeam1' into Codelevraicode)
     digitalWrite(ledChronometree, LOW);
     ledChronometree = -1;
     TIMSK3 &= ~_BV(TOIE3);
@@ -61,8 +65,14 @@ void allumerLedDixSecondes(int pin) {
   digitalWrite(pin, HIGH);
   ledChronometree = pin;
   ticksLed = 0;
+<<<<<<< HEAD
   TCNT3 = 0;
   TIFR3 = _BV(TOV3);
+=======
+  // Reset the PWM timer so the 10-second interval starts at this point.
+  TCNT3 = 0;
+  TIFR3 = _BV(TOV3); // efface un overflow en attente
+>>>>>>> parent of 6c679b3 (Merge branch 'CodeTeam1' into Codelevraicode)
   TIMSK3 |= _BV(TOIE3);
   interrupts();
 }
@@ -83,13 +93,13 @@ void setup(){
   pinMode(LED_ORANGE, OUTPUT);
   pinMode(LED_BLEU, OUTPUT);
   pinMode(LED_VERT, OUTPUT);
+  // LED classiques câblées entre la broche et GND : LOW = éteinte.
   digitalWrite(LED_ROSE, LOW);
   digitalWrite(LED_JAUNE, LOW);
   digitalWrite(LED_ORANGE, LOW);
   digitalWrite(LED_BLEU, LOW);
   digitalWrite(LED_VERT, LOW);
   initialiserDetecteurProximite();
-  initialiserSuiveurLigne();
   Serial.begin(115200);
   ENCODER_Reset(0);
   ENCODER_Reset(1);
@@ -97,6 +107,7 @@ void setup(){
   beep(1);
   initialiserSon();
   initialiserCapteurCouleur();
+  initialiserPince();
 
   // Les bumpers sont lus dans loop(); on commence sans mouvement.
   arret();
@@ -105,8 +116,9 @@ void setup(){
 void loop() {
 
   CouleurId couleurLue = identifierCouleur(lireCapteur());
-  if (couleurLue == couleurCandidate) { 
-    if (lecturesCouleurStables < 3) lecturesCouleurStables++;
+  if (couleurLue == couleurCandidate) {
+    if (lecturesCouleurStables < LECTURES_COULEUR_REQUISES)
+      lecturesCouleurStables++;
   } else {
     couleurCandidate = couleurLue;
     lecturesCouleurStables = 1;
@@ -145,8 +157,6 @@ void loop() {
     }
     derniereCouleurAnnoncee = couleurCandidate;
   }
-  continuer();
-  delay(10);
 
   bool Arr = ROBUS_IsBumper(3);
   if (Arr) {
