@@ -53,7 +53,7 @@ const int LED_JAUNE = 39;
 const int LED_ORANGE = 40;
 const int LED_BLEU = 41;
 const int LED_VERT = 42;
-const int LECTURES_COULEUR_REQUISES = 4;
+const int LECTURES_COULEUR_REQUISES = 2;
 int ledChronometree = -1;
 unsigned long debutLed = 0;
 
@@ -86,11 +86,11 @@ void setup(){
   pinMode(LED_ORANGE, OUTPUT);
   pinMode(LED_BLEU, OUTPUT);
   pinMode(LED_VERT, OUTPUT);
-  digitalWrite(LED_ROSE, LOW);
-  digitalWrite(LED_JAUNE, LOW);
-  digitalWrite(LED_ORANGE, LOW);
-  digitalWrite(LED_BLEU, LOW);
-  digitalWrite(LED_VERT, LOW);
+  digitalWrite(LED_ROSE, HIGH);
+  digitalWrite(LED_JAUNE, HIGH);
+  digitalWrite(LED_ORANGE, HIGH);
+  digitalWrite(LED_BLEU,HIGH);
+  digitalWrite(LED_VERT, HIGH);
   initialiserDetecteurProximite();
   initialiserSuiveurLigne();
   Serial.begin(115200);
@@ -132,6 +132,8 @@ void traiterCouleurDuParcours() {
     }
 
     if (nombreBips > 0) {
+      Serial.print("Action couleur : ");
+      Serial.println(nomCouleur(couleurCandidate));
       arret();
       allumerLedDixSecondes(led);
       beep(nombreBips);
@@ -146,6 +148,8 @@ void traiterCouleurDuParcours() {
 
     }
     derniereCouleurAnnoncee = couleurCandidate;
+    reinitialiserSuiveurLigne();
+    Serial.println("Action terminee : reprise du suivi de ligne.");
   }
 }
 
@@ -153,6 +157,24 @@ void loop() {
   actualiserLed();
   static bool parcoursActif = false;
   const uint32_t CODE_DEMARRAGE = 0x08F7807FUL;
+
+  // Calibration disponible à l'arrêt, avant le départ par télécommande.
+  static bool calibrationEtaitDemandee = false;
+  const bool calibrationDemandee = ROBUS_IsBumper(1);
+  const bool nouvelAppuiCalibration =
+      calibrationDemandee && !calibrationEtaitDemandee;
+  calibrationEtaitDemandee = calibrationDemandee;
+
+  if (!parcoursActif && nouvelAppuiCalibration) {
+    arret();
+    modeCalibration();
+    couleurCandidate = AUCUN;
+    derniereCouleurAnnoncee = AUCUN;
+    lecturesCouleurStables = 0;
+    // Écarter un message reçu pendant les mesures.
+    REMOTE_read();
+    return;
+  }
 
   // Lire une seule fois le message reçu pendant ce passage dans loop().
   const uint32_t message = REMOTE_read();
@@ -184,12 +206,7 @@ void loop() {
     delay(1000);
     tourne(-90);
   }
-  // Bumper 1 : lance la calibration des couleurs
-  bool droite = ROBUS_IsBumper(1);
-  if (droite) {
-    delay(500);          
-    modeCalibration();
-  }
+  
   bool Av = ROBUS_IsBumper(2);
     if (Av) {
       delay(500);

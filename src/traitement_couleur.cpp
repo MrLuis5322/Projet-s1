@@ -4,6 +4,7 @@
 #include <Adafruit_TCS34725.h>
 #include "traitement_couleur.h"
 #include <LibRobus.h>
+#include <string.h>
 
 
 // Initialisation du capteur
@@ -85,16 +86,56 @@ Couleur moyenneCouleur() {
 //plage de valeurs pour chaque couleur
 // ---------------------------------------------------------------
 
+struct PlageCouleur {
+    CouleurId id;
+    const char* nom;
+    Couleur minimum;
+    Couleur maximum;
+};
+
+// Valeurs initiales, remplacées par les mesures lors de la calibration.
+static PlageCouleur plages[] = {
+    {ROSE, "Rose", {312, 288, 181}, {409, 384, 233}},
+    {JAUNE, "Jaune", {340, 422, 228}, {413, 517, 279}},
+    {ORANGE, "Orange", {369, 29, 265}, {469, 378, 332}},
+    {BLEU, "Bleu", {350, 155, 145}, {481, 398, 491}},
+    {VERT, "Vert", {350, 155, 145}, {481, 398, 491}}
+};
+// {350, 155, 145}, {481, 398, 491}} vert
 CouleurId identifierCouleur(Couleur m) {
-  // ---------------------------------------------------------
-  // SEUILS (à remplir selon les mesures réelles)
-   if (369<m.R && m.R<469 && 29<m.G && m.G<378 && 265<m.B && m.B<332) return ORANGE;
-   if (340<m.R && m.R<413 && 422<m.G && m.G<517 && 228<m.B && m.B<279) return JAUNE;
-   if (312<m.R && m.R<409 && 288<m.G && m.G<384 && 181<m.B && m.B<233) return ROSE;
-   if (156<m.B && m.B<184 && 309<m.R && m.R<364 && 313<m.G && m.G<369) return BLEU;
-   if (257<m.G && m.G<298 && 405<m.R && m.R<481 && 334<m.B && m.B<391) return VERT;
-  // ---------------------------------------------------------
-  return AUCUN;
+    const float luminosite = m.R + m.G + m.B;
+    if (luminosite <= 0) return AUCUN;
+
+    CouleurId resultat = AUCUN;
+    float meilleureDistance = 1e9f;
+    float deuxiemeDistance = 1e9f;
+    for (const auto &plage : plages) {
+        // Moyennes des plages existantes, sans nouvelle calibration.
+        const float rouge = (plage.minimum.R + plage.maximum.R) * 0.5f;
+        const float vert = (plage.minimum.G + plage.maximum.G) * 0.5f;
+        const float bleu = (plage.minimum.B + plage.maximum.B) * 0.5f;
+        const float total = rouge + vert + bleu;
+        if (total <= 0 || luminosite < total * 0.35f ||
+            luminosite > total * 2.5f) continue;
+
+        // Les proportions changent moins que les valeurs brutes avec l'éclairage.
+        const float ecartR = m.R / luminosite - rouge / total;
+        const float ecartG = m.G / luminosite - vert / total;
+        const float ecartB = m.B / luminosite - bleu / total;
+        const float distance = ecartR * ecartR + ecartG * ecartG + ecartB * ecartB;
+        if (distance < meilleureDistance) {
+            deuxiemeDistance = meilleureDistance;
+            meilleureDistance = distance;
+            resultat = plage.id;
+        } else if (distance < deuxiemeDistance) {
+            deuxiemeDistance = distance;
+        }
+    }
+
+    // Rejeter les couleurs éloignées et les choix trop ambigus.
+    if (meilleureDistance > 0.012f ||
+        meilleureDistance >= deuxiemeDistance * 0.8f) return AUCUN;
+    return resultat;
 }
 
 // ---------------------------------------------------------------
@@ -113,7 +154,7 @@ String nomCouleur(CouleurId id) {
 }
 // ---------------------------------------------------------------
 // CALIBRATION DE LA COULEUR
-//utiliser pour trouver les seuils de couleur seulement, ne pas utiliser dans le programme final
+// Mesurer et appliquer les plages en mémoire pour la session courante.
 // ---------------------------------------------------------------
 
 void calibrerCouleur(const char* nom, int duree_ms) {   
@@ -144,6 +185,22 @@ void calibrerCouleur(const char* nom, int duree_ms) {
 
     if (n == 0) return;                                 // aucune lecture : on sort
 
+    // Marge de 5 % autour des mesures, avec au moins deux unités ADC.
+    const float margeR = max(2.0f, (sommeR / n) * 0.05f);
+    const float margeG = max(2.0f, (sommeG / n) * 0.05f);
+    const float margeB = max(2.0f, (sommeB / n) * 0.05f);
+    for (auto &plage : plages) {
+        if (strcmp(plage.nom, nom) == 0) {
+            plage.minimum = {
+                max(0.0f, minR - margeR),
+                max(0.0f, minG - margeG),
+                max(0.0f, minB - margeB)
+            };
+            plage.maximum = {maxR + margeR, maxG + margeG, maxB + margeB};
+        }
+    }
+    Serial.println("Plage de detection appliquee pour cette session.");
+
     Serial.print(nom);                                  // affichage des résultats
     Serial.print(" | R: "); Serial.print(minR);
     Serial.print(" a ");    Serial.print(maxR);
@@ -163,7 +220,8 @@ void modeCalibration() {
   for (int i = 0; i < 5; i++) {                           //boucle sur les couleurs à calibrer
     Serial.print("Place le capteur sur : ");
     Serial.println(noms[i]);
-    while (!ROBUS_IsBumper(2)) {}   // attend l'appui sur le bumper avant
+    while (ROBUS_IsBumper(2)) { delay(10); } // Relâcher avant chaque couleur.
+    while (!ROBUS_IsBumper(2)) { delay(10); }   // attend l'appui sur le bumper avant
     delay(500);
     calibrerCouleur(noms[i], 3000); // lit pendant 3 secondes
   }
