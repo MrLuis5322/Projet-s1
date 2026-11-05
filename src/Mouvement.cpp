@@ -87,9 +87,7 @@ void arret() {
 
 
 
-// Avance d'une distance en cm. Le PID corrige la difference entre les encodeurs
-// afin que les deux roues progressent a la meme vitesse vers la meme cible.
-void mouvementAvant(float distanceCM) {
+static void mouvementDistance(float distanceCM, float sens) {
     if (distanceCM <= 0.0f) {
         arret();
         return;
@@ -153,11 +151,20 @@ void mouvementAvant(float distanceCM) {
         if (restantD <= ERREUR_TICKS_FIN) commandeD = 0.0f;
         else commandeD = commandeAvecMinimum(commandeD, COMMANDE_MIN);
 
-        MOTOR_SetSpeed(LEFT, limiter(commandeG, 0.0f, 1.0f));
-        MOTOR_SetSpeed(RIGHT, limiter(commandeD, 0.0f, 1.0f));
+        MOTOR_SetSpeed(LEFT, sens * limiter(commandeG, 0.0f, 1.0f));
+        MOTOR_SetSpeed(RIGHT, sens * limiter(commandeD, 0.0f, 1.0f));
     }
 
     arret();
+}
+
+// Le PID synchronise les deux roues en marche avant comme en marche arriere.
+void mouvementAvant(float distanceCM) {
+    mouvementDistance(distanceCM, 1.0f);
+}
+
+void mouvementArriere(float distanceCM) {
+    mouvementDistance(distanceCM, -1.0f);
 }
 /*
 void tourne(int p_sens, float p_vitesse) {
