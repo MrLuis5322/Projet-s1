@@ -48,12 +48,12 @@ int etatPast = 0;
 // D22-D25 sont réservées au sonar, D26-D29 aux bumpers,
 // D30-D31 aux moteurs, D34-D35 aux encodeurs et D36 au buzzer.
 // Les cinq LED utilisent des broches libres.
-const int LED_ROSE = 32;
-const int LED_JAUNE = 33;
-const int LED_ORANGE = 38;
-const int LED_BLEU = 39;
-const int LED_VERT = 40;
-const int LECTURES_COULEUR_REQUISES = 8;
+const int LED_ROSE = 38;
+const int LED_JAUNE = 39;
+const int LED_ORANGE = 40;
+const int LED_BLEU = 41;
+const int LED_VERT = 42;
+const int LECTURES_COULEUR_REQUISES = 4;
 int ledChronometree = -1;
 unsigned long debutLed = 0;
 
