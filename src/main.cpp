@@ -101,7 +101,7 @@ void setup(){
   initialiserSon();
   initialiserCapteurCouleur();
 
-  // Les bumpers sont lus dans loop(); on commence sans mouvement.
+  // Le robot reste immobile en attendant le message IR de démarrage.
   arret();
 }
 
@@ -152,13 +152,24 @@ void traiterCouleurDuParcours() {
 
 void loop() {
   actualiserLed();
-  static bool arrierePrecedent = false;
   static bool parcoursActif = false;
-  const bool arriere = ROBUS_IsBumper(3);
-  const bool relache = arrierePrecedent && !arriere;
-  arrierePrecedent = arriere;
+  const uint32_t CODE_DEMARRAGE = 0x08F7807FUL;
 
-  if (!parcoursActif && relache && ligneCentree()) {
+  // Lire une seule fois le message reçu pendant ce passage dans loop().
+  const uint32_t message = REMOTE_read();
+
+  if (!parcoursActif) {
+    arret();
+    // 0 indique l'absence de message et FFFFFFFF une répétition NEC.
+    if (message == 0 || message == 0xFFFFFFFFUL) {
+      return;
+    }
+    if (message != CODE_DEMARRAGE) {
+      beep(1); // Message reçu, mais le robot reste en attente.
+      return;
+    }
+
+    beep(2); // Confirme le démarrage avant de commander les moteurs.
     reinitialiserSuiveurLigne();
     parcoursActif = true;
   }
