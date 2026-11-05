@@ -6,30 +6,46 @@
 
 
 void continuer() {
-
     int cas = detecterPositionRobot();
-
-    if (cas == 2) avance(1);
-    while (cas == 2){
-        avanceMaj();
-        cas = detecterPositionRobot();
-        delay(10);
+    static int dernierCoteLigne = 0; // -1 gauche, +1 droite
+    // Une seule mise à jour par appel afin que loop() continue de lire les
+    // bumpers et le capteur de couleur.
+    switch (cas) {
+      case 2: // ligne au centre
+      case 5: // intersection ou ligne large
+      case 7:
+        MOTOR_SetSpeed(LEFT, 0.30f);
+        MOTOR_SetSpeed(RIGHT, 0.30f);
+        break;
+      case 1: // ligne à droite
+      case 3:
+        dernierCoteLigne = 1;
+        MOTOR_SetSpeed(LEFT, 0.30f);
+        MOTOR_SetSpeed(RIGHT, 0.16f);
+        break;
+      case 4: // ligne à gauche
+      case 6:
+        dernierCoteLigne = -1;
+        MOTOR_SetSpeed(LEFT, 0.16f);
+        MOTOR_SetSpeed(RIGHT, 0.30f);
+        break;
+      case 0: // ligne perdue / départ : avance lentement pour la retrouver
+        if (dernierCoteLigne > 0) {
+          MOTOR_SetSpeed(LEFT, 0.24f);
+          MOTOR_SetSpeed(RIGHT, 0.12f);
+        } else if (dernierCoteLigne < 0) {
+          MOTOR_SetSpeed(LEFT, 0.12f);
+          MOTOR_SetSpeed(RIGHT, 0.24f);
+        } else {
+          MOTOR_SetSpeed(LEFT, 0.18f);
+          MOTOR_SetSpeed(RIGHT, 0.18f);
+        }
+        break;
+      default: // ligne large / intersection
+        MOTOR_SetSpeed(LEFT, 0.25f);
+        MOTOR_SetSpeed(RIGHT, 0.25f);
+        break;
     }
-    avancePlus();
-
-    while (cas == 0 || cas == 7 || cas == 4 || cas == 6){
-        tourneUneRoue(1, 1);
-        cas = detecterPositionRobot();
-        delay(10);
-    }
-    arret();
-
-    while (cas == 1 || cas == 3){
-        tourneUneRoue(-1, 1);
-        cas = detecterPositionRobot();
-        delay(10);
-    }
-    arret();
 }
 
 void EtapeJaune () {

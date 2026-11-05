@@ -4,6 +4,7 @@
 const int gauche = A0; // U1
 const int centre = A1; // U2
 const int droite = A2; // U3
+const int SEUIL_LIGNE_ADC = 512; // seuil provisoire à ajuster avec les valeurs Serial
 
 // Configure les pins en entree. Cette fonction est appelee une fois dans setup().
 void initialiserSuiveurLigne() {
@@ -13,20 +14,23 @@ void initialiserSuiveurLigne() {
 }
 
 int detecterPositionRobot() {
+    int valeurG = analogRead(gauche);
+    int valeurC = analogRead(centre);
+    int valeurD = analogRead(droite);
+    bool g = valeurG > SEUIL_LIGNE_ADC;
+    bool c = valeurC > SEUIL_LIGNE_ADC;
+    bool d = valeurD > SEUIL_LIGNE_ADC;
 
-    int pins[3] = {gauche, centre, droite};
-    bool lecturesCapteurs[3] = {false, false, false}; // True : Noir , False : Autre
-
-    for (int i = 0; i < 3; i++){
-        int valeur = analogRead(pins[i]); // 0 à 1023 (ADC 10 bits)
-        float tension = valeur * 5.0 / 1023.0;
-        if(tension > 3.5f) lecturesCapteurs[i] = true;
-        else lecturesCapteurs[i] = false;
+    // Affiche les valeurs brutes deux fois par seconde pour permettre de
+    // régler SEUIL_LIGNE_ADC selon le capteur et la surface réels.
+    static unsigned long dernierAffichage = 0;
+    if (millis() - dernierAffichage >= 500) {
+        dernierAffichage = millis();
+        Serial.print("Ligne A0/A1/A2: ");
+        Serial.print(valeurG); Serial.print('/');
+        Serial.print(valeurC); Serial.print('/');
+        Serial.println(valeurD);
     }
-
-    bool g = lecturesCapteurs[0];
-    bool c = lecturesCapteurs[1];
-    bool d = lecturesCapteurs[2];
 
     if      (!g && !c && !d)  return 0; // 000 : aucun capteur sur la ligne (ligne perdue)
     else if (!g && !c &&  d)  return 1; // 001 : ligne à droite

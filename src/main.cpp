@@ -17,6 +17,7 @@ Inclure les librairies de functions que vous voulez utiliser
 #include <EtapeCombattant.h>
 #include <traitement_couleur.h>
 #include <DetecteurSuiveurLigne.h>
+#include <avr/interrupt.h>
 
 
 /*
@@ -43,26 +44,27 @@ const int LED_VERT = 40;
 const int LECTURES_COULEUR_REQUISES = 8;
 volatile int ledChronometree = -1;
 volatile uint16_t ticksLed = 0;
+bool capteurCouleurPret = false;
 
 // Timer3 overflow coupe la LED à 10 secondes même pendant une épreuve
-// bloquante. Le timer continue d'utiliser sa configuration PWM existante.
+// bloquante. En PWM phase-correct AVR, un overflow dure environ 2,04 ms.
 ISR(TIMER3_OVF_vect) {
-  // Avec le PWM 8 bits Arduino (horloge / 64), un overflow dure 1,024 ms.
-  if (ledChronometree >= 0 && ++ticksLed >= 9766) {
+  if (ledChronometree >= 0 && ++ticksLed >= 4902) {
     digitalWrite(ledChronometree, LOW);
     ledChronometree = -1;
-    TIMSK1 &= ~_BV(OCIE1A);
+    TIMSK3 &= ~_BV(TOIE3);
   }
 }
 
 void allumerLedDixSecondes(int pin) {
   noInterrupts();
+  if (ledChronometree >= 0) digitalWrite(ledChronometree, LOW);
   digitalWrite(pin, HIGH);
   ledChronometree = pin;
   ticksLed = 0;
-  TCNT1 = 0;
-  TIFR1 = _BV(OCF1A); // efface une interruption compare en attente
-  TIMSK1 |= _BV(OCIE1A);
+  TCNT3 = 0;
+  TIFR3 = _BV(TOV3);
+  TIMSK3 |= _BV(TOIE3);
   interrupts();
 }
 
@@ -87,10 +89,6 @@ void setup(){
   digitalWrite(LED_ORANGE, LOW);
   digitalWrite(LED_BLEU, LOW);
   digitalWrite(LED_VERT, LOW);
-  // Timer1 en mode CTC : une interruption par seconde (16 MHz / 1024).
-  TCCR1A = 0;
-  TCCR1B = _BV(WGM12) | _BV(CS12) | _BV(CS10);
-  OCR1A = 15624;
   initialiserDetecteurProximite();
   initialiserSuiveurLigne();
   Serial.begin(115200);
@@ -99,7 +97,12 @@ void setup(){
   delay(1000);
   beep(1);
   initialiserSon();
-  initialiserCapteurCouleur();
+  capteurCouleurPret = initialiserCapteurCouleur();
+  if (capteurCouleurPret) {
+    Serial.println("Capteur couleur TCS34725 detecte; LED d'eclairage activee.");
+  } else {
+    Serial.println("TCS34725 absent: verifier VIN, GND, SDA et SCL.");
+  }
 
   // Les bumpers sont lus dans loop(); on commence sans mouvement.
   arret();
@@ -107,9 +110,23 @@ void setup(){
 
 void loop() {
 
-  CouleurId couleurLue = identifierCouleur(lireCapteur());
+  CouleurId couleurLue = AUCUN;
+  if (capteurCouleurPret) {
+    Couleur mesure = lireCapteur();
+    couleurLue = identifierCouleur(mesure);
+    static unsigned long dernierAffichageCouleur = 0;
+    if (millis() - dernierAffichageCouleur >= 500) {
+      dernierAffichageCouleur = millis();
+      Serial.print("RGB brut: ");
+      Serial.print(mesure.R); Serial.print('/');
+      Serial.print(mesure.G); Serial.print('/');
+      Serial.print(mesure.B); Serial.print(" -> ");
+      Serial.println(nomCouleur(couleurLue));
+    }
+  }
   if (couleurLue == couleurCandidate) { 
-    if (lecturesCouleurStables < 3) lecturesCouleurStables++;
+    if (lecturesCouleurStables < LECTURES_COULEUR_REQUISES)
+      lecturesCouleurStables++;
   } else {
     couleurCandidate = couleurLue;
     lecturesCouleurStables = 1;

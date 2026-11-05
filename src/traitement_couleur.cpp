@@ -13,7 +13,10 @@ Adafruit_TCS34725 capteur = Adafruit_TCS34725(
 );
 
 bool initialiserCapteurCouleur() {
-    return capteur.begin();
+    if (!capteur.begin()) return false;
+    // Sur le breakout Adafruit, cela allume la LED si son circuit est relié à INT.
+    capteur.setInterrupt(false);
+    return true;
 }
 
 // ---------------------------------------------------------------
@@ -86,14 +89,12 @@ Couleur moyenneCouleur() {
 // ---------------------------------------------------------------
 
 CouleurId identifierCouleur(Couleur m) {
-  // ---------------------------------------------------------
-  // SEUILS (à remplir selon les mesures réelles)
-   if (196<m.R && m.R<211 && 161<m.G && m.G<173 && 142<m.B && m.B<153) return ROSE;
-   if (156<m.R && m.R<176 && 184<m.G && m.G<205 && 116<m.B && m.B<128) return JAUNE;
-   if (130<m.R && m.R<159 && 128<m.G && m.G<153 && 94<m.B && m.B<109) return ORANGE;
-   if (80<m.B && m.B<93 && 131<m.R && m.R<156 && 126<m.G && m.G<152) return BLEU;
-   if (109<m.G && m.G<121 && 162<m.R && m.R<177 && 137<m.B && m.B<150) return VERT;
-  // ---------------------------------------------------------
+  // Seuils calibrés conservés tels quels.
+  if (196 < m.R && m.R < 211 && 161 < m.G && m.G < 173 && 142 < m.B && m.B < 153) return ROSE;
+  if (156 < m.R && m.R < 176 && 184 < m.G && m.G < 205 && 116 < m.B && m.B < 128) return JAUNE;
+  if (130 < m.R && m.R < 159 && 128 < m.G && m.G < 153 && 94 < m.B && m.B < 109) return ORANGE;
+  if (80 < m.B && m.B < 93 && 131 < m.R && m.R < 156 && 126 < m.G && m.G < 152) return BLEU;
+  if (109 < m.G && m.G < 121 && 162 < m.R && m.R < 177 && 137 < m.B && m.B < 150) return VERT;
   return AUCUN;
 }
 
