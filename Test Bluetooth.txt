@@ -1,0 +1,56 @@
+TEST BLUETOOTH ROBUS
+
+1. VS Code / PlatformIO
+Ouvrir le dossier Robus. Dans PlatformIO > Project Tasks > bluetooth_test,
+choisir Build ou Upload. Upload utilise le port USB du Mega. Il remplace
+le programme en cours sur la carte. Pour revenir au programme du robot,
+faire Upload dans megaatmega2560.
+
+2. Brancher le module série Bluetooth classique
+Couper l'alimentation pendant le câblage.
+    TXD du module -> D19 (RX1)
+    RXD du module <- D18 (TX1), via adaptation 5 V vers 3,3 V
+    GND du module -> GND du Mega
+    VCC -> tension indiquée sur la fiche de ton modèle ou de son support
+Exemple diviseur sur TX1 : D18 -> 1 kΩ -> point RXD -> 2 kΩ -> GND.
+Le test utilise Serial1 à 9600. Le connecteur Bluetooth de LibRobus est
+configuré pour Serial2 à 115200 dans le programme habituel. Ce guide
+utilise le câblage Serial1, pas ce connecteur.
+
+3. Windows
+Alimenter le module en mode données. Paramètres > Bluetooth et appareils
+> Ajouter un appareil > Bluetooth. Sélectionner le module et entrer le
+code d'appairage de sa notice si demandé.
+Dans Bluetooth et appareils > Appareils > Autres paramètres Bluetooth
+> Ports COM, relever le port Sortant associé au module. Au besoin,
+cliquer Ajouter, Sortant et choisir le module. Garder le port USB du Mega
+pour le téléversement et le moniteur série.
+
+4. Application PC
+Dans l'appli, cliquer Rafraîchir, choisir le COM Bluetooth sortant,
+9600 puis Connecter. La console doit afficher CMD|...|SYNC suivi de
+ACK|...|OK. L'indicateur passe à Robot répond. L'inventaire montre les
+objets du CSV. Dans la recherche Numéro, essayer 001 si toujours présent,
+puis Récupérer la pièce.
+La console doit montrer INFO|RETRAIT_SIMULE et la case devient libre.
+Le moniteur USB à 115200 montre les mêmes échanges côté Mega.
+
+Si le COM ouvre sans réponse, vérifier port sortant, fils croisés,
+masse commune et débit UART réel du module. Si ton module est configuré
+à 115200 en mode données, mettre DEBIT_BT à 115200 et retéléverser.
+Changer seulement le débit dans l'appli ne reconfigure pas le module.
+
+Au Build ou Upload, PlatformIO lit ../API/Inventaire/data.csv et intègre
+une copie dans include/inventaire_initial.h. Le fichier source reste en lecture seule.
+Le Mega garde au plus 80 cases en mémoire vive. Un redémarrage recharge
+la copie du dernier téléversement. Pour charger un CSV modifié, téléverser
+à nouveau bluetooth_test. Les positions en double restent visibles,
+mais le test refuse de choisir entre deux lignes à la même position.
+Les mouvements, la batterie et l'arrêt restent simulés.
+Dans stocker() et recuperer(), brancher plus tard les vraies actions et
+la sauvegarde SD. Confirmer les changements d'inventaire après réussite.
+
+Références
+https://content.arduino.cc/assets/Pinout-Mega2560rev3_latest.pdf
+https://support.microsoft.com/en-gb/windows/hardware/bluetooth/find-bluetooth-settings-in-windows
+https://www.junipersys.com/support/article/14876

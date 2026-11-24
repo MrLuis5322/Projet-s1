@@ -56,9 +56,11 @@ const int LED_JAUNE = 39;
 const int LED_ORANGE = 40;
 const int LED_BLEU = 41;
 const int LED_VERT = 42;
+const uint8_t AUCUNE_LED = 0xFF;
+const uint16_t DUREE_DEL_TICKS = 9766;
 const int LECTURES_COULEUR_REQUISES = 4;
-int ledChronometree = -1;
-unsigned long debutLed = 0;
+volatile uint8_t ledChronometree = AUCUNE_LED;
+volatile uint16_t ticksRestantsDEL = 0;
 
 ISR(TIMER0_COMPA_vect) {
   if (ticksRestantsDEL > 0 && --ticksRestantsDEL == 0) {
@@ -98,6 +100,10 @@ void setup(){
   digitalWrite(LED_ORANGE, LOW);
   digitalWrite(LED_BLEU, LOW);
   digitalWrite(LED_VERT, LOW);
+  // Timer0 compare A ticks once per 1.024 ms on the Mega.
+  OCR0A = 128;
+  TIFR0 = _BV(OCF0A);
+  TIMSK0 |= _BV(OCIE0A);
   initialiserDetecteurProximite();
   initialiserSuiveurLigne();
   Serial.begin(115200);
